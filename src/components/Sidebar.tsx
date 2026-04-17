@@ -27,17 +27,9 @@ const mainNav = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { label: "Charts", href: "/dashboard/analytics", icon: BarChart3 },
   { label: "Customers", href: "/dashboard/growth", icon: Users },
-  { label: "Product catalog", href: "#", icon: Tag },
-  { label: "Paywalls", href: "#", icon: CreditCard },
-  { label: "Targeting", href: "#", icon: Target },
-  { label: "Experiments", href: "#", icon: FlaskConical },
-  { label: "Customer center", href: "#", icon: HeadphonesIcon },
 ];
 
 const bottomNav = [
-  { label: "Apps & providers", href: "#", icon: Wrench },
-  { label: "API keys", href: "#", icon: Key },
-  { label: "Integrations", href: "#", icon: Puzzle },
   { label: "Project settings", href: "/settings", icon: Settings2 },
 ];
 

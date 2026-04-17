@@ -44,7 +44,7 @@ const cardIcons = ["📌", "📅", "🔄", "$"];
 export default function MetricCard({ metric, index }: MetricCardProps) {
   const isPositive = metric.change > 0;
   const isNeutral = metric.change === 0;
-  const sparkColor = isPositive ? "#00d2a0" : isNeutral ? "#0abde3" : "#ff9f43";
+  const sparkColor = isPositive ? "#34d399" : isNeutral ? "#22d3ee" : "#fbbf24";
 
   return (
     <div

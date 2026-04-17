@@ -57,18 +57,18 @@ export default function GrowthChart({
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               dx={-10}
             />

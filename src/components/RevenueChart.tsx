@@ -59,18 +59,18 @@ export default function RevenueChart({
                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               dx={-10}
             />

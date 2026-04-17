@@ -41,12 +41,12 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={items} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" horizontal={false} />
               <XAxis
                 type="number"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#6a6a8a" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
               />
               <YAxis
@@ -54,10 +54,10 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#9393b0" }}
+                tick={{ fontSize: 12, fill: "#9ba3b0" }}
                 width={100}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(58, 58, 92, 0.5)" }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.5)" }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
                 {items.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />

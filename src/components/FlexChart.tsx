@@ -61,18 +61,18 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
                   </linearGradient>
                 ))}
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
               <XAxis
                 dataKey={dateKey}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6a6a8a" }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6a6a8a" }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 tickFormatter={(v) =>
                   v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`
                 }
@@ -94,18 +94,18 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
             </AreaChart>
           ) : (
             <BarChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
               <XAxis
                 dataKey={dateKey}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6a6a8a" }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6a6a8a" }}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
                 dx={-10}
               />

@@ -50,14 +50,14 @@ export default function BreakdownChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="#3a3a5c"
+                stroke="#2e3340"
                 horizontal={false}
               />
               <XAxis
                 type="number"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#6a6a8a" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               />
               <YAxis
@@ -65,10 +65,10 @@ export default function BreakdownChart({
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#9393b0" }}
+                tick={{ fontSize: 12, fill: "#9ba3b0" }}
                 width={100}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(58, 58, 92, 0.5)" }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.5)" }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
                 {data.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />

@@ -38,21 +38,21 @@ export default function TransactionChart({
       <div className="h-[250px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#6a6a8a" }}
+              tick={{ fontSize: 12, fill: "#6b7280" }}
               dx={-10}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(58, 58, 92, 0.5)" }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.5)" }} />
             <Bar
               dataKey="transactions"
               fill="#06b6d4"
