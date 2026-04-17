@@ -75,14 +75,14 @@ export default function GrowthPage() {
 
   if (!isLoading && !processedData) {
     return (
-      <div className="flex min-h-screen bg-surface-secondary">
+      <div className="flex min-h-screen bg-rc-bg">
         <Sidebar />
         <main className="flex-1 min-w-0">
           <Header title="Growth" />
           <div className="p-8 text-center py-20">
-            <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 mb-4">No data source connected</p>
-            <Link href="/settings" className="text-brand-600 hover:text-brand-700 text-sm font-medium">
+            <TrendingUp className="w-12 h-12 text-rc-textDim mx-auto mb-4" />
+            <p className="text-rc-textMuted mb-4">No data source connected</p>
+            <Link href="/settings" className="text-rc-accent hover:text-rc-accentHover text-sm font-medium">
               Connect a Google Sheet →
             </Link>
           </div>
@@ -92,7 +92,7 @@ export default function GrowthPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface-secondary">
+    <div className="flex min-h-screen bg-rc-bg">
       <Sidebar />
       <main className="flex-1 min-w-0">
         <Header title="Growth" subtitle="Track cumulative growth over time" />

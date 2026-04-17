@@ -46,12 +46,12 @@ export default function DataTable({
   const displayData = showAll ? sortedData : sortedData.slice(0, maxRows);
 
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5 animate-fade-in">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Table className="w-4 h-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
-          <span className="text-xs text-gray-400">
+          <Table className="w-4 h-4 text-rc-textDim" />
+          <h3 className="text-sm font-semibold text-white">{title}</h3>
+          <span className="text-xs text-rc-textDim">
             ({data.length} rows)
           </span>
         </div>
@@ -60,12 +60,12 @@ export default function DataTable({
       <div className="overflow-x-auto -mx-5 px-5">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
+            <tr className="border-b border-rc-border">
               {columns.map((col) => (
                 <th
                   key={col}
                   onClick={() => handleSort(col)}
-                  className="text-left py-2.5 px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-gray-700 whitespace-nowrap"
+                  className="text-left py-2.5 px-3 text-xs font-semibold text-rc-textMuted uppercase tracking-wider cursor-pointer hover:text-white whitespace-nowrap"
                 >
                   <div className="flex items-center gap-1">
                     {col}
@@ -79,12 +79,12 @@ export default function DataTable({
             {displayData.map((row, i) => (
               <tr
                 key={i}
-                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                className="border-b border-rc-border/50 hover:bg-rc-surface/50 transition-colors"
               >
                 {columns.map((col) => (
                   <td
                     key={col}
-                    className="py-2.5 px-3 text-gray-700 whitespace-nowrap max-w-[200px] truncate"
+                    className="py-2.5 px-3 text-rc-text whitespace-nowrap max-w-[200px] truncate"
                   >
                     {row[col] || "—"}
                   </td>
@@ -99,7 +99,7 @@ export default function DataTable({
         <div className="mt-3 text-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="text-xs text-brand-600 hover:text-brand-700 font-medium"
+            className="text-xs text-rc-accent hover:text-rc-accentHover font-medium"
           >
             {showAll
               ? "Show less"

@@ -39,17 +39,17 @@ export default function GrowthChart({
   title = "Cumulative Revenue Growth",
 }: GrowthChartProps) {
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5 animate-fade-in">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-white">{title}</h3>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
-            <span className="text-xs text-gray-500">Cumulative</span>
+            <span className="text-xs text-rc-textMuted">Cumulative</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-cyan-500" />
-            <span className="text-xs text-gray-500">Per Period</span>
+            <span className="text-xs text-rc-textMuted">Per Period</span>
           </div>
         </div>
       </div>
@@ -57,18 +57,18 @@ export default function GrowthChart({
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "#6a6a8a" }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "#6a6a8a" }}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               dx={-10}
             />

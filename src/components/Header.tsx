@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCw, Bell } from "lucide-react";
+import { RefreshCw, Search, HelpCircle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -19,17 +19,17 @@ export default function Header({
   lastUpdated,
 }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-6 lg:px-8 h-16 bg-white border-b border-surface-border sticky top-0 z-30">
+    <header className="flex items-center justify-between px-6 lg:px-8 h-14 bg-rc-bg border-b border-rc-border sticky top-0 z-30">
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+        <h1 className="text-lg font-semibold text-white">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-rc-textMuted mt-0.5">{subtitle}</p>
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {lastUpdated && (
-          <span className="text-xs text-gray-400 hidden sm:block">
+          <span className="text-xs text-rc-textDim hidden sm:block">
             Updated {lastUpdated}
           </span>
         )}
@@ -39,21 +39,31 @@ export default function Header({
             onClick={onRefresh}
             disabled={isLoading}
             className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
-              "bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900",
-              "border border-gray-200",
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+              "bg-rc-surface text-rc-textMuted hover:text-white",
+              "border border-rc-border",
               isLoading && "opacity-60 cursor-not-allowed"
             )}
           >
             <RefreshCw
-              className={cn("w-4 h-4", isLoading && "animate-spin")}
+              className={cn("w-3.5 h-3.5", isLoading && "animate-spin")}
             />
             <span className="hidden sm:inline">Refresh</span>
           </button>
         )}
 
-        <button className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all">
-          <Bell className="w-5 h-5" />
+        <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rc-surface border border-rc-border text-rc-textMuted text-sm cursor-pointer hover:border-rc-borderLight transition-all">
+          <Search className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline ml-1">Search...</span>
+          <kbd className="hidden sm:inline-flex ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-rc-bg rounded border border-rc-border">Ctrl+K</kbd>
+        </div>
+
+        <button className="p-2 rounded-lg text-rc-textMuted hover:text-white hover:bg-rc-surface transition-all">
+          <HelpCircle className="w-4 h-4" />
+        </button>
+
+        <button className="p-2 rounded-lg text-rc-textMuted hover:text-white hover:bg-rc-surface transition-all">
+          <User className="w-4 h-4" />
         </button>
       </div>
     </header>

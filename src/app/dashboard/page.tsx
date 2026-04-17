@@ -134,7 +134,7 @@ export default function DashboardPage() {
   }, [sheetId, sheetName, handleConnect]);
 
   return (
-    <div className="flex min-h-screen bg-surface-secondary">
+    <div className="flex min-h-screen bg-rc-bg">
       <Sidebar />
 
       <main className="flex-1 min-w-0">
@@ -163,17 +163,17 @@ export default function DashboardPage() {
 
               {/* Empty state */}
               <div className="mt-12 text-center py-16">
-                <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="w-8 h-8 text-gray-400" />
+                <div className="w-16 h-16 rounded-2xl bg-rc-surface flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="w-8 h-8 text-rc-textDim" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                <h2 className="text-lg font-semibold text-white mb-2">
                   No data source connected
                 </h2>
-                <p className="text-sm text-gray-500 max-w-md mx-auto mb-6">
+                <p className="text-sm text-rc-textMuted max-w-md mx-auto mb-6">
                   Connect any Google Sheet — we&apos;ll automatically detect your
                   columns and generate the right charts. No specific format required.
                 </p>
-                <div className="flex items-center justify-center gap-2 text-sm text-brand-600">
+                <div className="flex items-center justify-center gap-2 text-sm text-rc-accent">
                   <span>Paste your sheet URL above to begin</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -198,7 +198,7 @@ export default function DashboardPage() {
 
               {/* Metric Cards */}
               {processedData.metrics.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {processedData.metrics.map((metric, i) => (
                     <MetricCard key={metric.label} metric={metric} index={i} />
                   ))}
@@ -240,7 +240,7 @@ export default function DashboardPage() {
               <div>
                 <button
                   onClick={() => setShowTable(!showTable)}
-                  className="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors"
+                  className="text-sm font-medium text-rc-accent hover:text-rc-accentHover transition-colors"
                 >
                   {showTable ? "Hide raw data" : "Show raw data table"}
                 </button>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Sheet Connector at bottom */}
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-rc-border">
                 <SheetConnector
                   onConnect={handleConnect}
                   isConnected={isConnected}

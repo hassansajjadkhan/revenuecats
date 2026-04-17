@@ -61,7 +61,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-secondary">
+    <div className="flex min-h-screen bg-rc-bg">
       <Sidebar />
 
       <main className="flex-1 min-w-0">
@@ -78,22 +78,22 @@ export default function SettingsPage() {
 
           {/* Disconnect Button */}
           {isConnected && (
-            <div className="bg-white rounded-xl border border-surface-border p-5">
+            <div className="bg-rc-card rounded-xl border border-rc-border p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Database className="w-5 h-5 text-gray-400" />
+                  <Database className="w-5 h-5 text-rc-textDim" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-white">
                       Connected Sheet
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5 font-mono">
+                    <p className="text-xs text-rc-textMuted mt-0.5 font-mono">
                       {savedSheetId.slice(0, 20)}...
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleDisconnect}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-rc-red hover:bg-rc-redBg rounded-lg transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
                   Disconnect
@@ -104,32 +104,32 @@ export default function SettingsPage() {
 
           {/* Info Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl border border-surface-border p-5">
+            <div className="bg-rc-card rounded-xl border border-rc-border p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-emerald-600" />
+                <div className="w-8 h-8 rounded-lg bg-emerald-900/30 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-emerald-400" />
                 </div>
-                <h4 className="text-sm font-semibold text-gray-900">
+                <h4 className="text-sm font-semibold text-white">
                   Data Privacy
                 </h4>
               </div>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-rc-textMuted leading-relaxed">
                 Your Google Sheet data is fetched server-side and never stored.
                 Only the sheet ID is saved locally in your browser for
                 reconnection.
               </p>
             </div>
 
-            <div className="bg-white rounded-xl border border-surface-border p-5">
+            <div className="bg-rc-card rounded-xl border border-rc-border p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-brand-600" />
+                <div className="w-8 h-8 rounded-lg bg-rc-accent/15 flex items-center justify-center">
+                  <Zap className="w-4 h-4 text-rc-accent" />
                 </div>
-                <h4 className="text-sm font-semibold text-gray-900">
+                <h4 className="text-sm font-semibold text-white">
                   Auto-Sync
                 </h4>
               </div>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-rc-textMuted leading-relaxed">
                 Data refreshes every time you load the dashboard or click
                 Refresh. Update your Google Sheet and the dashboard will reflect
                 changes within seconds.
@@ -138,47 +138,47 @@ export default function SettingsPage() {
           </div>
 
           {/* Sheet Format Guide */}
-          <div className="bg-white rounded-xl border border-surface-border p-5">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">
+          <div className="bg-rc-card rounded-xl border border-rc-border p-5">
+            <h4 className="text-sm font-semibold text-white mb-3">
               Works with Any Sheet
             </h4>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-rc-textMuted mb-4">
               Just link your Google Sheet — columns are automatically detected by analyzing the data.
               Date columns, numeric columns, and categories are identified automatically.
             </p>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-xs border border-gray-100 rounded-lg overflow-hidden">
+              <table className="w-full text-xs border border-rc-border rounded-lg overflow-hidden">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                  <tr className="bg-rc-surface">
+                    <th className="px-3 py-2 text-left font-semibold text-rc-textMuted">
                       Date
                     </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                    <th className="px-3 py-2 text-left font-semibold text-rc-textMuted">
                       Revenue
                     </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                    <th className="px-3 py-2 text-left font-semibold text-rc-textMuted">
                       Category
                     </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                    <th className="px-3 py-2 text-left font-semibold text-rc-textMuted">
                       Customer
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-gray-500">
-                  <tr className="border-t border-gray-50">
+                <tbody className="text-rc-text">
+                  <tr className="border-t border-rc-border/50">
                     <td className="px-3 py-2">2024-01-15</td>
                     <td className="px-3 py-2">$1,200</td>
                     <td className="px-3 py-2">Premium</td>
                     <td className="px-3 py-2">john@example.com</td>
                   </tr>
-                  <tr className="border-t border-gray-50">
+                  <tr className="border-t border-rc-border/50">
                     <td className="px-3 py-2">2024-01-16</td>
                     <td className="px-3 py-2">$800</td>
                     <td className="px-3 py-2">Basic</td>
                     <td className="px-3 py-2">jane@example.com</td>
                   </tr>
-                  <tr className="border-t border-gray-50">
+                  <tr className="border-t border-rc-border/50">
                     <td className="px-3 py-2">2024-01-16</td>
                     <td className="px-3 py-2">$2,400</td>
                     <td className="px-3 py-2">Enterprise</td>
@@ -188,7 +188,7 @@ export default function SettingsPage() {
               </table>
             </div>
 
-            <p className="text-xs text-gray-400 mt-3">
+            <p className="text-xs text-rc-textDim mt-3">
               Column names don&apos;t matter — the system analyzes your actual data values
               to detect dates, numbers, and categories automatically.
             </p>

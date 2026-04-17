@@ -20,16 +20,16 @@ export function cn(...classes: (string | boolean | undefined | null)[]): string 
 }
 
 export const CHART_COLORS = [
-  "#3b82f6",
-  "#8b5cf6",
-  "#06b6d4",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#ec4899",
-  "#6366f1",
-  "#14b8a6",
-  "#f97316",
+  "#00d2a0",
+  "#6c5ce7",
+  "#0abde3",
+  "#ff9f43",
+  "#ff6b6b",
+  "#a29bfe",
+  "#55efc4",
+  "#fd79a8",
+  "#74b9ff",
+  "#ffeaa7",
 ];
 
 export function extractSheetId(input: string): string {

@@ -17,8 +17,8 @@ export default function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-3 animate-fade-in">
       {/* Date Range */}
-      <div className="flex items-center gap-2 bg-white border border-surface-border rounded-lg px-3 py-2">
-        <Calendar className="w-4 h-4 text-gray-400" />
+      <div className="flex items-center gap-2 bg-rc-card border border-rc-border rounded-lg px-3 py-2">
+        <Calendar className="w-4 h-4 text-rc-textDim" />
         <input
           type="date"
           value={filters.dateRange.start}
@@ -28,9 +28,9 @@ export default function FilterBar({
               dateRange: { ...filters.dateRange, start: e.target.value },
             })
           }
-          className="text-sm text-gray-700 bg-transparent outline-none w-[120px]"
+          className="text-sm text-rc-text bg-transparent outline-none w-[120px]"
         />
-        <span className="text-gray-300">—</span>
+        <span className="text-rc-textDim">—</span>
         <input
           type="date"
           value={filters.dateRange.end}
@@ -40,7 +40,7 @@ export default function FilterBar({
               dateRange: { ...filters.dateRange, end: e.target.value },
             })
           }
-          className="text-sm text-gray-700 bg-transparent outline-none w-[120px]"
+          className="text-sm text-rc-text bg-transparent outline-none w-[120px]"
         />
       </div>
 
@@ -52,7 +52,7 @@ export default function FilterBar({
             onChange={(e) =>
               onFilterChange({ ...filters, category: e.target.value })
             }
-            className="appearance-none bg-white border border-surface-border rounded-lg px-3 py-2 pr-8 text-sm text-gray-700 outline-none cursor-pointer hover:border-gray-300 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            className="appearance-none bg-rc-card border border-rc-border rounded-lg px-3 py-2 pr-8 text-sm text-rc-text outline-none cursor-pointer hover:border-rc-borderLight focus:border-rc-accent focus:ring-1 focus:ring-rc-accent"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -61,20 +61,20 @@ export default function FilterBar({
               </option>
             ))}
           </select>
-          <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <ChevronDown className="w-4 h-4 text-rc-textDim absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
       )}
 
       {/* Group By */}
-      <div className="flex items-center bg-white border border-surface-border rounded-lg overflow-hidden">
+      <div className="flex items-center bg-rc-card border border-rc-border rounded-lg overflow-hidden">
         {(["day", "week", "month"] as const).map((period) => (
           <button
             key={period}
             onClick={() => onFilterChange({ ...filters, groupBy: period })}
             className={`px-3 py-2 text-sm font-medium transition-all ${
               filters.groupBy === period
-                ? "bg-brand-500 text-white"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                ? "bg-rc-accent text-white"
+                : "text-rc-textMuted hover:text-white hover:bg-rc-surface"
             }`}
           >
             {period.charAt(0).toUpperCase() + period.slice(1)}

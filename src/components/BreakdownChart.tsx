@@ -36,8 +36,8 @@ export default function BreakdownChart({
   title = "Revenue by Category",
 }: BreakdownChartProps) {
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5 animate-fade-in">
-      <h3 className="text-sm font-semibold text-gray-900 mb-6">{title}</h3>
+    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
+      <h3 className="text-sm font-semibold text-white mb-6">{title}</h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bar Chart */}
@@ -50,14 +50,14 @@ export default function BreakdownChart({
             >
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="#f1f5f9"
+                stroke="#3a3a5c"
                 horizontal={false}
               />
               <XAxis
                 type="number"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                tick={{ fontSize: 11, fill: "#6a6a8a" }}
                 tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               />
               <YAxis
@@ -65,10 +65,10 @@ export default function BreakdownChart({
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#64748b" }}
+                tick={{ fontSize: 12, fill: "#9393b0" }}
                 width={100}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "#f8fafc" }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(58, 58, 92, 0.5)" }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
                 {data.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
@@ -83,22 +83,22 @@ export default function BreakdownChart({
           {data.map((item, i) => (
             <div
               key={i}
-              className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-rc-surface transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-rc-text">
                   {item.name}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-white">
                   {formatCurrency(item.value)}
                 </span>
-                <span className="text-xs text-gray-400 w-12 text-right">
+                <span className="text-xs text-rc-textDim w-12 text-right">
                   {item.percentage}%
                 </span>
               </div>

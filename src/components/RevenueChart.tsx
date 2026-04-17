@@ -39,13 +39,13 @@ export default function RevenueChart({
   title = "Revenue Over Time",
 }: RevenueChartProps) {
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5 animate-fade-in">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-sm font-semibold text-white">{title}</h3>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-brand-500" />
-            <span className="text-xs text-gray-500">Revenue</span>
+            <span className="text-xs text-rc-textMuted">Revenue</span>
           </div>
         </div>
       </div>
@@ -59,18 +59,18 @@ export default function RevenueChart({
                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#3a3a5c" />
             <XAxis
               dataKey="date"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "#6a6a8a" }}
               dy={10}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#94a3b8" }}
+              tick={{ fontSize: 12, fill: "#6a6a8a" }}
               tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
               dx={-10}
             />
@@ -93,7 +93,7 @@ export default function RevenueChart({
 
 export function RevenueChartSkeleton() {
   return (
-    <div className="bg-white rounded-xl border border-surface-border p-5">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-5">
       <div className="flex items-center justify-between mb-6">
         <div className="h-4 w-36 skeleton rounded" />
         <div className="h-3 w-20 skeleton rounded" />
