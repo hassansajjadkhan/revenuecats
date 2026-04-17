@@ -67,7 +67,7 @@ export default function SettingsPage() {
       <main className="flex-1 min-w-0">
         <Header title="Settings" subtitle="Manage your data source and preferences" />
 
-        <div className="p-6 lg:p-8 space-y-6 max-w-3xl">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-3xl">
           {/* Data Source */}
           <SheetConnector
             onConnect={handleConnect}

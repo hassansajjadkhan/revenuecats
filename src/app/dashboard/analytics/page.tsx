@@ -97,7 +97,7 @@ export default function AnalyticsPage() {
       <Sidebar />
       <main className="flex-1 min-w-0">
         <Header title="Analytics" subtitle="Detailed data analysis" />
-        <div className="p-6 lg:p-8 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {processedData && (
             <>
               {processedData.mapping && <DetectedColumns mapping={processedData.mapping} />}

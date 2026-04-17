@@ -36,10 +36,10 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
   const { title, dateKey, series, data } = chart;
 
   return (
-    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-3 sm:p-5 animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
         <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
           {series.map((s) => (
             <div key={s.key} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
@@ -49,7 +49,7 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
         </div>
       </div>
 
-      <div className="h-[300px]">
+      <div className="h-[220px] sm:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           {variant === "area" ? (
             <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>

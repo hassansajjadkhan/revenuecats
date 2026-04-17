@@ -15,10 +15,10 @@ export default function FilterBar({
   categories,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 animate-fade-in">
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3 animate-fade-in">
       {/* Date Range */}
-      <div className="flex items-center gap-2 bg-rc-card border border-rc-border rounded-lg px-3 py-2">
-        <Calendar className="w-4 h-4 text-rc-textDim" />
+      <div className="flex items-center gap-2 bg-rc-card border border-rc-border rounded-lg px-2 sm:px-3 py-2 w-full sm:w-auto">
+        <Calendar className="w-4 h-4 text-rc-textDim flex-shrink-0" />
         <input
           type="date"
           value={filters.dateRange.start}
@@ -28,7 +28,7 @@ export default function FilterBar({
               dateRange: { ...filters.dateRange, start: e.target.value },
             })
           }
-          className="text-sm text-rc-text bg-transparent outline-none w-[120px]"
+          className="text-sm text-rc-text bg-transparent outline-none w-[110px] sm:w-[120px]"
         />
         <span className="text-rc-textDim">—</span>
         <input
@@ -40,7 +40,7 @@ export default function FilterBar({
               dateRange: { ...filters.dateRange, end: e.target.value },
             })
           }
-          className="text-sm text-rc-text bg-transparent outline-none w-[120px]"
+          className="text-sm text-rc-text bg-transparent outline-none w-[110px] sm:w-[120px]"
         />
       </div>
 

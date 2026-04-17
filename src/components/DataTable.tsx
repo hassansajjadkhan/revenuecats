@@ -46,7 +46,7 @@ export default function DataTable({
   const displayData = showAll ? sortedData : sortedData.slice(0, maxRows);
 
   return (
-    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-3 sm:p-5 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Table className="w-4 h-4 text-rc-textDim" />
@@ -57,7 +57,7 @@ export default function DataTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-5 px-5">
+      <div className="overflow-x-auto -mx-3 sm:-mx-5 px-3 sm:px-5">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-rc-border">

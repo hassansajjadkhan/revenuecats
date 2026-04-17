@@ -34,11 +34,11 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
   const { title, items } = breakdown;
 
   return (
-    <div className="bg-rc-card rounded-xl border border-rc-border p-5 animate-fade-in">
-      <h3 className="text-sm font-semibold text-white mb-6">{title}</h3>
+    <div className="bg-rc-card rounded-xl border border-rc-border p-3 sm:p-5 animate-fade-in">
+      <h3 className="text-sm font-semibold text-white mb-4 sm:mb-6">{title}</h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="h-[260px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="h-[200px] sm:h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={items} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" horizontal={false} />

@@ -96,11 +96,11 @@ export default function GrowthPage() {
       <Sidebar />
       <main className="flex-1 min-w-0">
         <Header title="Growth" subtitle="Track cumulative growth over time" />
-        <div className="p-6 lg:p-8 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {processedData && (
             <>
               <FilterBar filters={filters} onFilterChange={handleFilterChange} categories={categories} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {processedData.metrics.map((metric, i) => (
                   <MetricCard key={metric.label} metric={metric} index={i} />
                 ))}

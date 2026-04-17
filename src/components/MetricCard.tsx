@@ -48,7 +48,7 @@ export default function MetricCard({ metric, index }: MetricCardProps) {
 
   return (
     <div
-      className="relative bg-rc-card rounded-xl border border-rc-border p-5 hover:border-rc-borderLight transition-all duration-200 animate-fade-in overflow-hidden"
+      className="relative bg-rc-card rounded-xl border border-rc-border p-3 sm:p-5 hover:border-rc-borderLight transition-all duration-200 animate-fade-in overflow-hidden"
       style={{ animationDelay: `${index * 75}ms` }}
     >
       <div className="flex items-start justify-between mb-1">

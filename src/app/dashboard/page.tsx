@@ -150,8 +150,7 @@ export default function DashboardPage() {
           lastUpdated={lastUpdated}
         />
 
-        <div className="p-6 lg:p-8 space-y-6">
-          {/* Sheet Connector - always visible when not connected */}
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {!isConnected && (
             <div className="max-w-2xl">
               <SheetConnector
@@ -198,7 +197,7 @@ export default function DashboardPage() {
 
               {/* Metric Cards */}
               {processedData.metrics.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {processedData.metrics.map((metric, i) => (
                     <MetricCard key={metric.label} metric={metric} index={i} />
                   ))}
@@ -213,7 +212,7 @@ export default function DashboardPage() {
 
                   {/* Remaining charts in grid */}
                   {processedData.timeSeriesCharts.length > 1 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       {processedData.timeSeriesCharts.slice(1).map((chart, i) => (
                         <FlexChart
                           key={chart.title}

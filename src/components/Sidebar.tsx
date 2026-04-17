@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -20,6 +20,8 @@ import {
   Key,
   Puzzle,
   Settings2,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +38,22 @@ const bottomNav = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
 
   const renderNavItem = (item: typeof mainNav[0]) => {
     const isActive =
@@ -56,25 +74,20 @@ export default function Sidebar() {
         title={collapsed ? item.label : undefined}
       >
         <Icon className={cn("w-[18px] h-[18px] flex-shrink-0", isActive && "text-rc-accent")} />
-        {!collapsed && <span>{item.label}</span>}
+        {(!collapsed || mobileOpen) && <span>{item.label}</span>}
       </Link>
     );
   };
 
-  return (
+  const sidebarContent = (
     <>
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-sidebar-bg border-r border-rc-border transition-all duration-300 flex flex-col",
-          collapsed ? "w-[68px]" : "w-[240px]"
-        )}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-4 h-14 border-b border-rc-border">
+      {/* Logo */}
+      <div className="flex items-center justify-between px-4 h-14 border-b border-rc-border">
+        <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg bg-rc-accent flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-xs">RC</span>
           </div>
-          {!collapsed && (
+          {(!collapsed || mobileOpen) && (
             <div className="flex items-center gap-1.5">
               <span className="text-white font-semibold text-sm tracking-tight">
                 Analytics
@@ -85,36 +98,84 @@ export default function Sidebar() {
             </div>
           )}
         </div>
+        {/* Close button on mobile */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="lg:hidden p-1.5 rounded-lg text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-all"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        {/* Main Navigation */}
-        <nav className="flex-1 py-3 px-2.5 space-y-0.5 overflow-y-auto">
-          {mainNav.map(renderNavItem)}
-        </nav>
+      {/* Main Navigation */}
+      <nav className="flex-1 py-3 px-2.5 space-y-0.5 overflow-y-auto">
+        {mainNav.map(renderNavItem)}
+      </nav>
 
-        {/* Bottom Navigation */}
-        <div className="border-t border-rc-border py-3 px-2.5 space-y-0.5">
-          {bottomNav.map(renderNavItem)}
-        </div>
+      {/* Bottom Navigation */}
+      <div className="border-t border-rc-border py-3 px-2.5 space-y-0.5">
+        {bottomNav.map(renderNavItem)}
+      </div>
 
-        {/* Collapse button */}
-        <div className="border-t border-rc-border p-2.5">
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="flex items-center justify-center w-full py-1.5 rounded-lg text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-all"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <ChevronLeft className="w-4 h-4" />
-            )}
-          </button>
-        </div>
+      {/* Collapse button - desktop only */}
+      <div className="hidden lg:block border-t border-rc-border p-2.5">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center justify-center w-full py-1.5 rounded-lg text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-all"
+        >
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="fixed top-3 left-3 z-50 lg:hidden p-2 rounded-lg bg-rc-card border border-rc-border text-rc-textMuted hover:text-white transition-all"
+        aria-label="Open menu"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile sidebar drawer */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-50 h-screen bg-sidebar-bg border-r border-rc-border flex flex-col w-[260px] transition-transform duration-300 lg:hidden",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent}
       </aside>
 
-      {/* Spacer */}
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 h-screen bg-sidebar-bg border-r border-rc-border transition-all duration-300 flex-col hidden lg:flex",
+          collapsed ? "w-[68px]" : "w-[240px]"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop spacer */}
       <div
         className={cn(
-          "flex-shrink-0 transition-all duration-300",
+          "flex-shrink-0 transition-all duration-300 hidden lg:block",
           collapsed ? "w-[68px]" : "w-[240px]"
         )}
       />
