@@ -211,8 +211,8 @@ export default function DashboardPage() {
                 categories={categories}
               />
 
-              {/* Metric Cards */}
-              {processedData.metrics.length > 0 && (
+              {/* Metric Cards + Category Breakdowns unified grid */}
+              {(processedData.metrics.length > 0 || processedData.categoryBreakdowns.length > 0) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {processedData.metrics
                     .filter((metric) =>
@@ -220,6 +220,13 @@ export default function DashboardPage() {
                     )
                     .map((metric, i) => (
                       <MetricCard key={metric.label} metric={metric} index={i} />
+                    ))}
+                  {processedData.categoryBreakdowns
+                    .filter((bd) =>
+                      !searchQuery || bd.title.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((bd) => (
+                      <FlexBreakdown key={bd.title} breakdown={bd} />
                     ))}
                 </div>
               )}
@@ -255,21 +262,6 @@ export default function DashboardPage() {
               {/* Growth Chart */}
               {processedData.growthData.length > 0 && (
                 <GrowthChart data={processedData.growthData} />
-              )}
-
-              {/* Category Breakdowns */}
-              {processedData.categoryBreakdowns.filter((bd) =>
-                !searchQuery || bd.title.toLowerCase().includes(searchQuery.toLowerCase())
-              ).length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {processedData.categoryBreakdowns
-                    .filter((bd) =>
-                      !searchQuery || bd.title.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((bd) => (
-                      <FlexBreakdown key={bd.title} breakdown={bd} />
-                    ))}
-                </div>
               )}
 
               {/* Data Table Toggle */}
