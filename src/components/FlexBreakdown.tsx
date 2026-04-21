@@ -34,53 +34,48 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
   const { title, items } = breakdown;
 
   return (
-    <div className="bg-rc-card rounded-xl border border-rc-border p-3 sm:p-5 animate-fade-in">
-      <h3 className="text-sm font-semibold text-white mb-4 sm:mb-6">{title}</h3>
+    <div className="bg-rc-card rounded-lg border border-rc-border p-4 animate-fade-in hover:border-rc-borderLight transition-colors">
+      <h3 className="text-sm font-semibold text-white mb-4">{title}</h3>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <div className="h-[200px] sm:h-[260px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={items} layout="vertical" margin={{ top: 0, right: 10, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" horizontal={false} />
-              <XAxis
-                type="number"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: "#6b7280" }}
-                tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
-              />
-              <YAxis
-                type="category"
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 11, fill: "#9ba3b0" }}
-                width={100}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.25)" }} />
-              <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
-                {items.map((entry, i) => (
-                  <Cell key={i} fill={entry.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="h-[180px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={items} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" horizontal={false} />
+            <XAxis
+              type="number"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: "#6b7280" }}
+              tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10, fill: "#9ba3b0" }}
+              width={70}
+            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.25)" }} />
+            <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
+              {items.map((entry, i) => (
+                <Cell key={i} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-        <div className="space-y-2.5">
-          {items.map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-rc-surface transition-colors border border-transparent hover:border-rc-border">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                <span className="text-sm font-medium text-rc-text">{item.name}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-white">{item.value.toLocaleString()}</span>
-                <span className="text-xs text-rc-textDim w-12 text-right">{item.percentage}%</span>
-              </div>
+      <div className="mt-3 space-y-1.5">
+        {items.slice(0, 3).map((item, i) => (
+          <div key={i} className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+              <span className="text-rc-text truncate">{item.name}</span>
             </div>
-          ))}
-        </div>
+            <span className="text-rc-textMuted font-medium">{item.percentage}%</span>
+          </div>
+        ))}
       </div>
     </div>
   );
