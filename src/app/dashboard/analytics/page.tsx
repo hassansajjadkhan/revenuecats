@@ -27,6 +27,7 @@ export default function AnalyticsPage() {
   const [smartMapping, setSmartMapping] = useState<SmartMapping | null>(null);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: "", end: "" },
     category: "all",
@@ -100,11 +101,20 @@ export default function AnalyticsPage() {
     <div className="flex min-h-screen dashboard-shell">
       <Sidebar />
       <main className="flex-1 min-w-0">
-        <Header title="Analytics" subtitle="Charts and revenue exploration" />
+        <Header 
+          title="Analytics" 
+          subtitle="Charts and revenue exploration"
+          onSearch={setSearchQuery}
+        />
         <div className="p-3 sm:p-5 lg:p-6 dashboard-content-wrap">
           {processedData && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
-              {processedData.timeSeriesCharts.slice(0, 6).map((chart, idx) => {
+              {processedData.timeSeriesCharts
+                .slice(0, 6)
+                .filter((chart) =>
+                  chart.series[0].label.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((chart, idx) => {
                 const series = chart.series[0];
                 const seriesKey = series.key;
                 const colors = [
@@ -173,6 +183,19 @@ export default function AnalyticsPage() {
                   </div>
                 );
               })}
+              {searchQuery && processedData.timeSeriesCharts.filter((chart) =>
+                chart.series[0].label.toLowerCase().includes(searchQuery.toLowerCase())
+              ).length === 0 && (
+                <div className="col-span-full flex flex-col items-center justify-center py-12">
+                  <p className="text-rc-textMuted mb-2">No charts match "{searchQuery}"</p>
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="text-sm text-rc-accent hover:text-rc-accentHover transition-colors"
+                  >
+                    Clear search
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

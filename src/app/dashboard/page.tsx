@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const [sheetName, setSheetName] = useState<string>();
   const [categories, setCategories] = useState<string[]>([]);
   const [showTable, setShowTable] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: "", end: "" },
@@ -148,6 +149,7 @@ export default function DashboardPage() {
           onRefresh={isConnected ? handleRefresh : undefined}
           isLoading={isLoading}
           lastUpdated={lastUpdated}
+          onSearch={setSearchQuery}
         />
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 dashboard-content-wrap">
@@ -210,9 +212,13 @@ export default function DashboardPage() {
               {/* Metric Cards */}
               {processedData.metrics.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {processedData.metrics.map((metric, i) => (
-                    <MetricCard key={metric.label} metric={metric} index={i} />
-                  ))}
+                  {processedData.metrics
+                    .filter((metric) =>
+                      metric.label.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((metric, i) => (
+                      <MetricCard key={metric.label} metric={metric} index={i} />
+                    ))}
                 </div>
               )}
 
@@ -220,18 +226,25 @@ export default function DashboardPage() {
               {processedData.timeSeriesCharts.length > 0 && (
                 <>
                   {/* First chart full width */}
-                  <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" />
+                  {(!searchQuery || processedData.timeSeriesCharts[0].title.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                    <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" />
+                  )}
 
                   {/* Remaining charts in grid */}
                   {processedData.timeSeriesCharts.length > 1 && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {processedData.timeSeriesCharts.slice(1).map((chart, i) => (
-                        <FlexChart
-                          key={chart.title}
-                          chart={chart}
-                          variant={i === processedData.timeSeriesCharts.length - 2 ? "bar" : "area"}
-                        />
-                      ))}
+                      {processedData.timeSeriesCharts
+                        .slice(1)
+                        .filter((chart) =>
+                          !searchQuery || chart.title.toLowerCase().includes(searchQuery.toLowerCase())
+                        )
+                        .map((chart, i) => (
+                          <FlexChart
+                            key={chart.title}
+                            chart={chart}
+                            variant={i === processedData.timeSeriesCharts.length - 2 ? "bar" : "area"}
+                          />
+                        ))}
                     </div>
                   )}
                 </>
@@ -243,9 +256,13 @@ export default function DashboardPage() {
               )}
 
               {/* Category Breakdowns */}
-              {processedData.categoryBreakdowns.map((bd) => (
-                <FlexBreakdown key={bd.title} breakdown={bd} />
-              ))}
+              {processedData.categoryBreakdowns
+                .filter((bd) =>
+                  !searchQuery || bd.title.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((bd) => (
+                  <FlexBreakdown key={bd.title} breakdown={bd} />
+                ))}
 
               {/* Data Table Toggle */}
               <div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { RefreshCw, Search, HelpCircle, User } from "lucide-react";
+import { useState } from "react";
+import { RefreshCw, Search, HelpCircle, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -9,6 +10,7 @@ interface HeaderProps {
   onRefresh?: () => void;
   isLoading?: boolean;
   lastUpdated?: string;
+  onSearch?: (query: string) => void;
 }
 
 export default function Header({
@@ -17,7 +19,21 @@ export default function Header({
   onRefresh,
   isLoading,
   lastUpdated,
+  onSearch,
 }: HeaderProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    onSearch?.(query);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    onSearch?.("");
+  };
   return (
     <header className="flex items-center justify-between px-4 sm:px-6 lg:px-7 h-12 bg-[#0f1218]/95 border-b border-rc-border sticky top-0 z-30 backdrop-blur">
       <div className="pl-10 lg:pl-0">
@@ -52,10 +68,28 @@ export default function Header({
           </button>
         )}
 
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#11141b] border border-rc-border text-[#8892a4] text-[12px] cursor-pointer hover:border-rc-borderLight transition-colors min-w-[190px]">
-          <Search className="w-3.5 h-3.5" />
-          <span className="inline ml-1">Search...</span>
-          <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[#0c0f14] rounded border border-rc-border">Ctrl+K</kbd>
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#11141b] border border-rc-border text-[#8892a4] text-[12px] hover:border-rc-borderLight transition-colors min-w-[190px] focus-within:border-rc-accent focus-within:text-white">
+          <Search className="w-3.5 h-3.5 flex-shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => setIsSearchFocused(true)}
+            onBlur={() => setIsSearchFocused(false)}
+            placeholder="Search..."
+            className="flex-1 bg-transparent outline-none text-white placeholder:text-[#8892a4] text-[12px]"
+          />
+          {searchQuery && (
+            <button
+              onClick={clearSearch}
+              className="flex-shrink-0 p-0.5 hover:bg-[#181c25] rounded transition-colors"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          )}
+          {!searchQuery && (
+            <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[#0c0f14] rounded border border-rc-border">Ctrl+K</kbd>
+          )}
         </div>
 
         <button className="p-1.5 rounded-md text-rc-textMuted hover:text-white hover:bg-[#181c25] transition-colors md:hidden">
