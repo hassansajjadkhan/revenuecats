@@ -186,28 +186,28 @@ export default function Header({
           </button>
 
           {menuOpen && currentUser && (
-            <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-rc-border bg-[#2a2c31] shadow-2xl p-4 z-50">
-              <div className="pb-4 border-b border-white/15">
-                <p className="text-4xl font-semibold text-white leading-tight">{userName}</p>
-                <p className="text-[22px] text-white/85 leading-tight mt-1">{currentUser.email}</p>
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-rc-border bg-[#2a2c31] shadow-2xl p-3 z-50">
+              <div className="pb-3 border-b border-white/15">
+                <p className="text-2xl font-semibold text-white leading-tight">{userName}</p>
+                <p className="text-sm text-white/85 leading-tight mt-1">{currentUser.email}</p>
               </div>
 
-              <div className="pt-3 space-y-1">
+              <div className="pt-2 space-y-1">
                 <Link
                   href="/settings"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
                 >
-                  <Settings className="w-5 h-5 text-white/80" />
-                  <span className="text-lg font-medium">Account settings</span>
+                  <Settings className="w-4 h-4 text-white/80" />
+                  <span className="text-sm font-medium">Account settings</span>
                 </Link>
 
                 <button
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white hover:bg-white/10 transition-colors"
+                  className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
                 >
-                  <LogOut className="w-5 h-5 text-white/80" />
-                  <span className="text-lg font-medium">Log out</span>
+                  <LogOut className="w-4 h-4 text-white/80" />
+                  <span className="text-sm font-medium">Log out</span>
                 </button>
               </div>
             </div>
