@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AuthGuard from "@/components/AuthGuard";
 import SheetConnector from "@/components/SheetConnector";
 import { Trash2, Database, Shield, Zap } from "lucide-react";
 
@@ -61,10 +62,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen dashboard-shell">
-      <Sidebar />
+    <AuthGuard>
+      <div className="flex min-h-screen dashboard-shell">
+        <Sidebar />
 
-      <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0">
         <Header title="Settings" subtitle="Manage your data source and preferences" />
 
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-3xl dashboard-content-wrap">
@@ -196,7 +198,8 @@ export default function SettingsPage() {
             </p>
           </div>
         </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }

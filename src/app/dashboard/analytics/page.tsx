@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AuthGuard from "@/components/AuthGuard";
 import {
   detectColumns,
   processData,
@@ -98,9 +99,10 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="flex min-h-screen dashboard-shell">
-      <Sidebar />
-      <main className="flex-1 min-w-0">
+    <AuthGuard>
+      <div className="flex min-h-screen dashboard-shell">
+        <Sidebar />
+        <main className="flex-1 min-w-0">
         <Header 
           title="Analytics" 
           subtitle="Charts and revenue exploration"
@@ -199,7 +201,8 @@ export default function AnalyticsPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AuthGuard from "@/components/AuthGuard";
 import MetricCard, { MetricCardSkeleton } from "@/components/MetricCard";
 import FlexChart, { FlexChartSkeleton } from "@/components/FlexChart";
 import GrowthChart from "@/components/GrowthChart";
@@ -135,10 +136,11 @@ export default function DashboardPage() {
   }, [sheetId, sheetName, handleConnect]);
 
   return (
-    <div className="flex min-h-screen dashboard-shell">
-      <Sidebar />
+    <AuthGuard>
+      <div className="flex min-h-screen dashboard-shell">
+        <Sidebar />
 
-      <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0">
         <Header
           title="Dashboard"
           subtitle={
@@ -313,7 +315,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }

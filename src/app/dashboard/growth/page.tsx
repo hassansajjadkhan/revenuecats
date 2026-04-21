@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AuthGuard from "@/components/AuthGuard";
 import GrowthChart from "@/components/GrowthChart";
 import MetricCard from "@/components/MetricCard";
 import FilterBar from "@/components/FilterBar";
@@ -92,9 +93,10 @@ export default function GrowthPage() {
   }
 
   return (
-    <div className="flex min-h-screen dashboard-shell">
-      <Sidebar />
-      <main className="flex-1 min-w-0">
+    <AuthGuard>
+      <div className="flex min-h-screen dashboard-shell">
+        <Sidebar />
+        <main className="flex-1 min-w-0">
         <Header title="Growth" subtitle="Track cumulative growth over time" />
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 dashboard-content-wrap">
           {processedData && (
@@ -110,7 +112,8 @@ export default function GrowthPage() {
             </>
           )}
         </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </AuthGuard>
   );
 }
