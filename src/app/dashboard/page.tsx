@@ -229,26 +229,23 @@ export default function DashboardPage() {
                       <FlexBreakdown key={bd.title} breakdown={bd} />
                     ))}
 
-                  {/* First chart spans full 3 columns */}
+                  {/* First chart as regular grid cell */}
                   {processedData.timeSeriesCharts.length > 0 &&
                     (!searchQuery || processedData.timeSeriesCharts[0].title.toLowerCase().includes(searchQuery.toLowerCase())) && (
-                    <div className="col-span-1 sm:col-span-2 lg:col-span-3">
-                      <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" tall />
-                    </div>
+                    <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" />
                   )}
 
-                  {/* Remaining charts — 2 per row inside the same grid */}
+                  {/* Remaining charts — each as a regular grid cell */}
                   {processedData.timeSeriesCharts.slice(1)
                     .filter((chart) =>
                       !searchQuery || chart.title.toLowerCase().includes(searchQuery.toLowerCase())
                     )
                     .map((chart, i) => (
-                      <div key={chart.title} className="col-span-1 sm:col-span-1 lg:col-span-1">
-                        <FlexChart
-                          chart={chart}
-                          variant={i % 2 === 1 ? "bar" : "area"}
-                        />
-                      </div>
+                      <FlexChart
+                        key={chart.title}
+                        chart={chart}
+                        variant={i % 2 === 1 ? "bar" : "area"}
+                      />
                     ))}
                 </div>
               )}
