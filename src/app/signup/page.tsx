@@ -28,7 +28,7 @@ export default function SignupPage() {
 
     setIsSubmitting(true);
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -36,7 +36,6 @@ export default function SignupPage() {
           full_name: name,
           source,
         },
-        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
@@ -47,8 +46,13 @@ export default function SignupPage() {
       return;
     }
 
-    setSuccess("Account created. Check your email to verify, then log in.");
-    setTimeout(() => router.push("/login"), 1300);
+    if (data.session) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    setSuccess("Account created. You can now log in.");
+    setTimeout(() => router.push("/login"), 900);
   };
 
   return (
