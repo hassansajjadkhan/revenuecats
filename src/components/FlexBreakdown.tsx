@@ -20,9 +20,9 @@ function CustomTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const item = payload[0].payload;
   return (
-    <div className="bg-rc-card border border-rc-border rounded-lg px-4 py-3 shadow-lg shadow-black/30">
-      <p className="font-semibold text-white text-sm">{item.name}</p>
-      <p className="text-sm text-rc-textMuted">
+    <div className="bg-[#171b22] border border-rc-border rounded-lg px-3 py-2.5 shadow-lg">
+      <p className="font-medium text-white text-xs">{item.name}</p>
+      <p className="text-xs text-rc-textMuted">
         {typeof item.value === "number" ? item.value.toLocaleString() : item.value}
       </p>
       <p className="text-xs text-rc-textDim">{item.percentage}% of total</p>
@@ -54,10 +54,10 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#9ba3b0" }}
+                tick={{ fontSize: 11, fill: "#9ba3b0" }}
                 width={100}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.5)" }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.25)" }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={24}>
                 {items.map((entry, i) => (
                   <Cell key={i} fill={entry.color} />
@@ -67,9 +67,9 @@ export default function FlexBreakdown({ breakdown }: FlexBreakdownProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {items.map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-rc-surface transition-colors">
+            <div key={i} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-rc-surface transition-colors border border-transparent hover:border-rc-border">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                 <span className="text-sm font-medium text-rc-text">{item.name}</span>

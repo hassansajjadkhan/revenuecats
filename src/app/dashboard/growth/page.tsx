@@ -75,11 +75,11 @@ export default function GrowthPage() {
 
   if (!isLoading && !processedData) {
     return (
-      <div className="flex min-h-screen bg-rc-bg">
+      <div className="flex min-h-screen dashboard-shell">
         <Sidebar />
         <main className="flex-1 min-w-0">
           <Header title="Growth" />
-          <div className="p-8 text-center py-20">
+          <div className="p-8 text-center py-20 dashboard-content-wrap">
             <TrendingUp className="w-12 h-12 text-rc-textDim mx-auto mb-4" />
             <p className="text-rc-textMuted mb-4">No data source connected</p>
             <Link href="/settings" className="text-rc-accent hover:text-rc-accentHover text-sm font-medium">
@@ -92,15 +92,16 @@ export default function GrowthPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-rc-bg">
+    <div className="flex min-h-screen dashboard-shell">
       <Sidebar />
       <main className="flex-1 min-w-0">
         <Header title="Growth" subtitle="Track cumulative growth over time" />
-        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 dashboard-content-wrap">
           {processedData && (
             <>
+              <h2 className="text-3xl sm:text-[34px] font-semibold tracking-tight text-white">Growth</h2>
               <FilterBar filters={filters} onFilterChange={handleFilterChange} categories={categories} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {processedData.metrics.map((metric, i) => (
                   <MetricCard key={metric.label} metric={metric} index={i} />
                 ))}

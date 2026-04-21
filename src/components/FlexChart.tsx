@@ -21,10 +21,10 @@ interface FlexChartProps {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-rc-card border border-rc-border rounded-lg px-4 py-3 shadow-lg shadow-black/30">
-      <p className="font-semibold text-white text-sm mb-1">{label}</p>
+    <div className="bg-[#171b22] border border-rc-border rounded-lg px-3 py-2.5 shadow-lg">
+      <p className="font-medium text-white text-xs mb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
-        <p key={i} className="text-sm" style={{ color: entry.color }}>
+        <p key={i} className="text-xs" style={{ color: entry.color }}>
           {entry.name}: {typeof entry.value === "number" ? entry.value.toLocaleString() : entry.value}
         </p>
       ))}
@@ -66,13 +66,13 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
                 dataKey={dateKey}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6b7280" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6b7280" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 tickFormatter={(v) =>
                   v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`
                 }
@@ -88,7 +88,7 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
                   strokeWidth={2.5}
                   fill={`url(#grad_${s.key})`}
                   dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, fill: "#fff", stroke: s.color }}
+                  activeDot={{ r: 5, strokeWidth: 2, fill: "#111318", stroke: s.color }}
                 />
               ))}
             </AreaChart>
@@ -99,17 +99,17 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
                 dataKey={dateKey}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6b7280" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fontSize: 12, fill: "#6b7280" }}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
                 tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
                 dx={-10}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(58, 58, 92, 0.5)" }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(46, 51, 64, 0.25)" }} />
               {series.map((s) => (
                 <Bar key={s.key} dataKey={s.key} fill={s.color} radius={[4, 4, 0, 0]} barSize={20} />
               ))}

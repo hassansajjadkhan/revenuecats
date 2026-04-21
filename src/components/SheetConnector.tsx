@@ -37,11 +37,11 @@ export default function SheetConnector({
   };
 
   return (
-    <div className="bg-rc-card rounded-xl border border-rc-border p-6 animate-fade-in">
+    <div className="bg-rc-card rounded-xl border border-rc-border p-4 sm:p-6 animate-fade-in">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-rc-accent/15 flex items-center justify-center">
-            <Link2 className="w-5 h-5 text-rc-accent" />
+          <div className="w-9 h-9 rounded-lg bg-[#141922] border border-rc-border flex items-center justify-center">
+            <Link2 className="w-4 h-4 text-rc-accent" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">
@@ -54,7 +54,7 @@ export default function SheetConnector({
         </div>
 
         {isConnected && (
-          <span className="flex items-center gap-1.5 text-xs font-medium text-rc-green bg-rc-greenBg px-2.5 py-1 rounded-full">
+          <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
             <CheckCircle2 className="w-3.5 h-3.5" />
             Connected
           </span>
@@ -62,9 +62,9 @@ export default function SheetConnector({
       </div>
 
       {/* Auto-detect badge */}
-      <div className="flex items-center gap-1.5 mb-4 px-3 py-2 bg-violet-900/20 border border-violet-800/30 rounded-lg">
-        <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-        <span className="text-xs text-violet-300 font-medium">
+      <div className="flex items-center gap-1.5 mb-4 px-3 py-2 bg-[#131a27] rounded-lg border border-[#243147]">
+        <Sparkles className="w-3.5 h-3.5 text-[#8fb3ff]" />
+        <span className="text-xs text-[#a8beea] font-medium">
           Smart Detection — we analyze your data and pick the best charts automatically. No specific format needed.
         </span>
       </div>
@@ -79,7 +79,7 @@ export default function SheetConnector({
       </button>
 
       {showHelp && (
-        <div className="mb-4 p-4 bg-blue-900/20 border border-blue-800/30 rounded-lg text-sm text-blue-300 space-y-2">
+        <div className="mb-4 p-4 bg-[#111b2e] rounded-lg text-sm text-[#b1c5e8] space-y-2 border border-[#293b5f]">
           <p className="font-medium">Steps to connect:</p>
           <ol className="list-decimal list-inside space-y-1 text-xs">
             <li>Open your Google Sheet</li>
@@ -92,7 +92,7 @@ export default function SheetConnector({
               Make sure your sheet has headers in the first row
             </li>
           </ol>
-          <p className="text-xs text-blue-400 mt-2">
+          <p className="text-xs text-[#8ca6d3] mt-2">
             Your data stays secure — it&apos;s only fetched server-side and never
             stored.
           </p>
@@ -111,7 +111,7 @@ export default function SheetConnector({
               value={sheetUrl}
               onChange={(e) => setSheetUrl(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/d/..."
-              className="flex-1 px-3 py-2.5 rounded-lg border border-rc-border bg-rc-surface text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all placeholder-rc-textDim"
+              className="flex-1 px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
             />
             <button
               onClick={handleConnect}
@@ -138,16 +138,16 @@ export default function SheetConnector({
             value={sheetName}
             onChange={(e) => setSheetName(e.target.value)}
             placeholder="Sheet1"
-            className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-rc-surface text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all placeholder-rc-textDim"
+            className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
           />
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="mt-4 p-3 bg-rc-redBg border border-red-800/30 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-rc-red flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-300">{error}</p>
+        <div className="mt-4 p-3 bg-red-50 rounded-lg flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 

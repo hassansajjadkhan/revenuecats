@@ -61,13 +61,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-rc-bg">
+    <div className="flex min-h-screen dashboard-shell">
       <Sidebar />
 
       <main className="flex-1 min-w-0">
         <Header title="Settings" subtitle="Manage your data source and preferences" />
 
-        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-3xl">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 max-w-3xl dashboard-content-wrap">
+          <h2 className="text-3xl sm:text-[34px] font-semibold tracking-tight text-white">Settings</h2>
+
           {/* Data Source */}
           <SheetConnector
             onConnect={handleConnect}
@@ -93,7 +95,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={handleDisconnect}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-rc-red hover:bg-rc-redBg rounded-lg transition-all"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-400 hover:bg-rc-redBg rounded-lg transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
                   Disconnect
@@ -106,8 +108,8 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-rc-card rounded-xl border border-rc-border p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-emerald-900/30 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-emerald-400" />
+                <div className="w-8 h-8 rounded-lg bg-rc-greenBg flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-rc-green" />
                 </div>
                 <h4 className="text-sm font-semibold text-white">
                   Data Privacy
@@ -122,7 +124,7 @@ export default function SettingsPage() {
 
             <div className="bg-rc-card rounded-xl border border-rc-border p-5">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-rc-accent/15 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-[#141f35] flex items-center justify-center">
                   <Zap className="w-4 h-4 text-rc-accent" />
                 </div>
                 <h4 className="text-sm font-semibold text-white">
@@ -165,20 +167,20 @@ export default function SettingsPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="text-rc-text">
-                  <tr className="border-t border-rc-border/50">
+                <tbody className="text-rc-textMuted">
+                  <tr className="border-t border-rc-border">
                     <td className="px-3 py-2">2024-01-15</td>
                     <td className="px-3 py-2">$1,200</td>
                     <td className="px-3 py-2">Premium</td>
                     <td className="px-3 py-2">john@example.com</td>
                   </tr>
-                  <tr className="border-t border-rc-border/50">
+                  <tr className="border-t border-rc-border">
                     <td className="px-3 py-2">2024-01-16</td>
                     <td className="px-3 py-2">$800</td>
                     <td className="px-3 py-2">Basic</td>
                     <td className="px-3 py-2">jane@example.com</td>
                   </tr>
-                  <tr className="border-t border-rc-border/50">
+                  <tr className="border-t border-rc-border">
                     <td className="px-3 py-2">2024-01-16</td>
                     <td className="px-3 py-2">$2,400</td>
                     <td className="px-3 py-2">Enterprise</td>

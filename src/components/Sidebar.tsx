@@ -5,19 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
-  Settings,
   LayoutDashboard,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
+  ChevronDown,
   Users,
-  Tag,
-  CreditCard,
   Target,
   FlaskConical,
-  HeadphonesIcon,
-  Wrench,
-  Key,
+  Globe,
+  Megaphone,
+  LifeBuoy,
+  Boxes,
+  CreditCard,
   Puzzle,
   Settings2,
   Menu,
@@ -25,19 +22,27 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const mainNav = [
+const topNav = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Charts", href: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3, chevron: true },
   { label: "Customers", href: "/dashboard/growth", icon: Users },
+  { label: "Product catalog", href: "#", icon: Boxes, chevron: true },
+  { label: "Paywalls", href: "#", icon: CreditCard },
+  { label: "Targeting", href: "#", icon: Target },
+  { label: "Experiments", href: "#", icon: FlaskConical },
+  { label: "Web", href: "#", icon: Globe },
+  { label: "Ads", href: "#", icon: Megaphone },
+  { label: "Lifecycle", href: "#", icon: LifeBuoy, chevron: true },
 ];
 
 const bottomNav = [
+  { label: "Apps & providers", href: "#", icon: Puzzle, chevron: true },
+  { label: "Integrations", href: "#", icon: Puzzle },
   { label: "Project settings", href: "/settings", icon: Settings2 },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Close mobile sidebar on route change
@@ -55,7 +60,7 @@ export default function Sidebar() {
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const renderNavItem = (item: typeof mainNav[0]) => {
+  const renderNavItem = (item: (typeof topNav)[0]) => {
     const isActive =
       pathname === item.href ||
       (item.href !== "/dashboard" && item.href !== "#" && pathname.startsWith(item.href));
@@ -66,69 +71,44 @@ export default function Sidebar() {
         key={item.label}
         href={item.href}
         className={cn(
-          "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150",
+          "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
           isActive
-            ? "bg-rc-accent/15 text-white"
-            : "text-sidebar-text hover:text-rc-text hover:bg-sidebar-hover"
+            ? "bg-[#171b22] text-white border border-rc-border"
+            : "text-[#b8c0cf] hover:text-white hover:bg-[#141821]"
         )}
-        title={collapsed ? item.label : undefined}
       >
-        <Icon className={cn("w-[18px] h-[18px] flex-shrink-0", isActive && "text-rc-accent")} />
-        {(!collapsed || mobileOpen) && <span>{item.label}</span>}
+        <span className="flex items-center gap-3">
+          <Icon className={cn("w-[16px] h-[16px] flex-shrink-0", isActive && "text-white")} />
+          <span>{item.label}</span>
+        </span>
+        {item.chevron && <ChevronDown className="w-3.5 h-3.5 text-[#6f7788]" />}
       </Link>
     );
   };
 
   const sidebarContent = (
     <>
-      {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-rc-border">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-rc-accent flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-xs">RC</span>
+      <div className="flex items-center justify-between px-3.5 h-12 border-b border-rc-border">
+        <div className="flex items-center gap-2.5">
+          <div className="w-5 h-5 rounded-md bg-[#ed4d5f] flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-semibold text-[10px]">RC</span>
           </div>
-          {(!collapsed || mobileOpen) && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-white font-semibold text-sm tracking-tight">
-                Analytics
-              </span>
-              <svg className="w-3 h-3 text-rc-textMuted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          )}
+          <span className="text-white text-sm font-semibold tracking-tight">TruthSayer AI</span>
         </div>
-        {/* Close button on mobile */}
         <button
           onClick={() => setMobileOpen(false)}
-          className="lg:hidden p-1.5 rounded-lg text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-all"
+          className="lg:hidden p-1.5 rounded-lg text-[#94a0b6] hover:text-white hover:bg-[#141821] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Main Navigation */}
-      <nav className="flex-1 py-3 px-2.5 space-y-0.5 overflow-y-auto">
-        {mainNav.map(renderNavItem)}
+      <nav className="flex-1 py-2 px-2.5 space-y-0.5 overflow-y-auto">
+        {topNav.map(renderNavItem)}
       </nav>
 
-      {/* Bottom Navigation */}
-      <div className="border-t border-rc-border py-3 px-2.5 space-y-0.5">
+      <div className="border-t border-rc-border py-2 px-2.5 space-y-0.5">
         {bottomNav.map(renderNavItem)}
-      </div>
-
-      {/* Collapse button - desktop only */}
-      <div className="hidden lg:block border-t border-rc-border p-2.5">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center w-full py-1.5 rounded-lg text-sidebar-text hover:text-white hover:bg-sidebar-hover transition-all"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
       </div>
     </>
   );
@@ -138,7 +118,7 @@ export default function Sidebar() {
       {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-3 left-3 z-50 lg:hidden p-2 rounded-lg bg-rc-card border border-rc-border text-rc-textMuted hover:text-white transition-all"
+        className="fixed top-2.5 left-3 z-50 lg:hidden p-2 rounded-lg bg-[#13161d] border border-rc-border text-[#a6afbe] hover:text-white transition-colors"
         aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
@@ -155,7 +135,7 @@ export default function Sidebar() {
       {/* Mobile sidebar drawer */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 h-screen bg-sidebar-bg border-r border-rc-border flex flex-col w-[260px] transition-transform duration-300 lg:hidden",
+          "fixed left-0 top-0 z-50 h-screen bg-[#0b0d12] border-r border-rc-border flex flex-col w-[248px] transition-transform duration-300 lg:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -165,20 +145,13 @@ export default function Sidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-sidebar-bg border-r border-rc-border transition-all duration-300 flex-col hidden lg:flex",
-          collapsed ? "w-[68px]" : "w-[240px]"
+          "fixed left-0 top-0 z-40 h-screen bg-[#0b0d12] border-r border-rc-border transition-all duration-300 flex-col hidden lg:flex w-[248px]"
         )}
       >
         {sidebarContent}
       </aside>
 
-      {/* Desktop spacer */}
-      <div
-        className={cn(
-          "flex-shrink-0 transition-all duration-300 hidden lg:block",
-          collapsed ? "w-[68px]" : "w-[240px]"
-        )}
-      />
+      <div className="flex-shrink-0 hidden lg:block w-[248px]" />
     </>
   );
 }

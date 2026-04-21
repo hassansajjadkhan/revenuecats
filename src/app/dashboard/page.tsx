@@ -134,7 +134,7 @@ export default function DashboardPage() {
   }, [sheetId, sheetName, handleConnect]);
 
   return (
-    <div className="flex min-h-screen bg-rc-bg">
+    <div className="flex min-h-screen dashboard-shell">
       <Sidebar />
 
       <main className="flex-1 min-w-0">
@@ -150,7 +150,19 @@ export default function DashboardPage() {
           lastUpdated={lastUpdated}
         />
 
-        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 dashboard-content-wrap">
+          <div className="flex items-center justify-between">
+            <h2 className="text-3xl sm:text-[34px] font-semibold tracking-tight text-white">Overview</h2>
+            <label className="hidden sm:flex items-center gap-2 text-sm text-white cursor-pointer select-none">
+              <input type="checkbox" className="sr-only" />
+              <span className="w-8 h-4 rounded-full border border-rc-border bg-rc-surface relative">
+                <span className="absolute top-[1px] left-[1px] w-3 h-3 rounded-full bg-[#e5e7eb]" />
+              </span>
+              Sandbox data
+            </label>
+          </div>
+
+          {/* Sheet Connector - always visible when not connected */}
           {!isConnected && (
             <div className="max-w-2xl">
               <SheetConnector
@@ -162,7 +174,7 @@ export default function DashboardPage() {
 
               {/* Empty state */}
               <div className="mt-12 text-center py-16">
-                <div className="w-16 h-16 rounded-2xl bg-rc-surface flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="w-8 h-8 text-rc-textDim" />
                 </div>
                 <h2 className="text-lg font-semibold text-white mb-2">
@@ -269,7 +281,7 @@ export default function DashboardPage() {
           {/* Loading State */}
           {isLoading && !processedData && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3, 4].map((i) => (
                   <MetricCardSkeleton key={i} />
                 ))}

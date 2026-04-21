@@ -19,17 +19,17 @@ export default function Header({
   lastUpdated,
 }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-14 bg-rc-bg border-b border-rc-border sticky top-0 z-30">
+    <header className="flex items-center justify-between px-4 sm:px-6 lg:px-7 h-12 bg-[#0f1218]/95 border-b border-rc-border sticky top-0 z-30 backdrop-blur">
       <div className="pl-10 lg:pl-0">
-        <h1 className="text-lg font-semibold text-white">{title}</h1>
+        <h1 className="text-[14px] leading-none font-medium text-white tracking-tight">{title}</h1>
         {subtitle && (
-          <p className="text-xs text-rc-textMuted mt-0.5">{subtitle}</p>
+          <p className="text-[11px] text-rc-textMuted mt-1 hidden xl:block">{subtitle}</p>
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-2 sm:gap-2.5">
         {lastUpdated && (
-          <span className="text-xs text-rc-textDim hidden sm:block">
+          <span className="text-[11px] text-rc-textDim hidden xl:block">
             Updated {lastUpdated}
           </span>
         )}
@@ -39,8 +39,8 @@ export default function Header({
             onClick={onRefresh}
             disabled={isLoading}
             className={cn(
-              "flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-              "bg-rc-surface text-rc-textMuted hover:text-white",
+              "hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[12px] font-medium transition-all",
+              "bg-[#181c25] text-rc-textMuted hover:text-white",
               "border border-rc-border",
               isLoading && "opacity-60 cursor-not-allowed"
             )}
@@ -52,22 +52,24 @@ export default function Header({
           </button>
         )}
 
-        <div className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rc-surface border border-rc-border text-rc-textMuted text-sm cursor-pointer hover:border-rc-borderLight transition-all">
+        <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#11141b] border border-rc-border text-[#8892a4] text-[12px] cursor-pointer hover:border-rc-borderLight transition-colors min-w-[190px]">
           <Search className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline ml-1">Search...</span>
-          <kbd className="hidden md:inline-flex ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-rc-bg rounded border border-rc-border">Ctrl+K</kbd>
+          <span className="inline ml-1">Search...</span>
+          <kbd className="ml-auto px-1.5 py-0.5 text-[10px] font-mono bg-[#0c0f14] rounded border border-rc-border">Ctrl+K</kbd>
         </div>
 
-        <button className="p-2 rounded-lg text-rc-textMuted hover:text-white hover:bg-rc-surface transition-all sm:hidden">
+        <button className="p-1.5 rounded-md text-rc-textMuted hover:text-white hover:bg-[#181c25] transition-colors md:hidden">
           <Search className="w-4 h-4" />
         </button>
 
-        <button className="hidden sm:block p-2 rounded-lg text-rc-textMuted hover:text-white hover:bg-rc-surface transition-all">
+        <button className="hidden sm:flex items-center gap-1 p-1.5 rounded-md text-rc-textMuted hover:text-white hover:bg-[#181c25] transition-colors text-[12px]">
           <HelpCircle className="w-4 h-4" />
+          <span className="hidden lg:inline">Help</span>
         </button>
 
-        <button className="p-2 rounded-lg text-rc-textMuted hover:text-white hover:bg-rc-surface transition-all">
+        <button className="flex items-center gap-1 p-1.5 rounded-md text-rc-textMuted hover:text-white hover:bg-[#181c25] transition-colors text-[12px]">
           <User className="w-4 h-4" />
+          <span className="hidden lg:inline">Account</span>
         </button>
       </div>
     </header>
