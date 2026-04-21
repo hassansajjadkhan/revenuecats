@@ -19,10 +19,6 @@ import {
 } from "recharts";
 import {
   BarChart3,
-  Calendar,
-  ChevronDown,
-  Filter,
-  SlidersHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -31,7 +27,6 @@ export default function AnalyticsPage() {
   const [smartMapping, setSmartMapping] = useState<SmartMapping | null>(null);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedHeader, setSelectedHeader] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: "", end: "" },
     category: "all",
@@ -83,13 +78,6 @@ export default function AnalyticsPage() {
     [rawData, smartMapping]
   );
 
-  useEffect(() => {
-    if (!processedData?.mapping?.numericColumns?.length) return;
-    if (!selectedHeader) {
-      setSelectedHeader(processedData.mapping.numericColumns[0]);
-    }
-  }, [processedData, selectedHeader]);
-
   if (!isLoading && !processedData) {
     return (
       <div className="flex min-h-screen dashboard-shell">
@@ -115,155 +103,76 @@ export default function AnalyticsPage() {
         <Header title="Analytics" subtitle="Charts and revenue exploration" />
         <div className="p-3 sm:p-5 lg:p-6 dashboard-content-wrap">
           {processedData && (
-            <div className="rounded-xl border border-rc-border bg-[#0f1218]/80 overflow-hidden">
-              <div className="flex flex-col min-h-[720px]">
-                <div className="h-12 px-4 border-b border-rc-border flex items-center gap-3 bg-[#0d1016]">
-                  <span className="text-sm text-rc-textMuted">Select metric:</span>
-                  <div className="relative inline-block">
-                    <select
-                      value={selectedHeader}
-                      onChange={(e) => setSelectedHeader(e.target.value)}
-                      className="px-3 py-1.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-white appearance-none cursor-pointer hover:bg-[#171c26] transition-colors pr-8"
-                    >
-                      {processedData.mapping.numericColumns.map((header) => (
-                        <option key={header} value={header}>
-                          {header}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-rc-textDim absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
+              {processedData.timeSeriesCharts.slice(0, 6).map((chart, idx) => {
+                const series = chart.series[0];
+                const seriesKey = series.key;
+                const colors = [
+                  { gradient: "analyticsChart0", stroke: "#00d18f", start: "rgba(0, 209, 143, 0.35)", end: "rgba(0, 209, 143, 0.03)" },
+                  { gradient: "analyticsChart1", stroke: "#3b82f6", start: "rgba(59, 130, 246, 0.35)", end: "rgba(59, 130, 246, 0.03)" },
+                  { gradient: "analyticsChart2", stroke: "#8b5cf6", start: "rgba(139, 92, 246, 0.35)", end: "rgba(139, 92, 246, 0.03)" },
+                  { gradient: "analyticsChart3", stroke: "#ec4899", start: "rgba(236, 72, 153, 0.35)", end: "rgba(236, 72, 153, 0.03)" },
+                  { gradient: "analyticsChart4", stroke: "#f59e0b", start: "rgba(245, 158, 11, 0.35)", end: "rgba(245, 158, 11, 0.03)" },
+                  { gradient: "analyticsChart5", stroke: "#10b981", start: "rgba(16, 185, 129, 0.35)", end: "rgba(16, 185, 129, 0.03)" },
+                ];
+                const color = colors[idx % colors.length];
+
+                return (
+                  <div key={idx} className="rounded-lg border border-rc-border bg-[#0f1218] overflow-hidden hover:border-rc-borderLight transition-colors">
+                    <div className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-sm font-semibold text-rc-textMuted uppercase tracking-tight">{series.label}</h3>
+                          <p className="text-2xl font-bold text-white mt-1">
+                            {Number(chart.data[chart.data.length - 1]?.[seriesKey] || 0).toLocaleString('en-US', {
+                              style: 'currency',
+                              currency: 'USD',
+                              maximumFractionDigits: 0
+                            })}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-rc-textMuted mb-1">Last 30 days</p>
+                          <p className="text-sm font-semibold text-emerald-400">+12.5%</p>
+                        </div>
+                      </div>
+
+                      <div className="h-[200px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={chart.data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                            <defs>
+                              <linearGradient id={color.gradient} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor={color.start} />
+                                <stop offset="95%" stopColor={color.end} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" vertical={false} />
+                            <XAxis dataKey={chart.dateKey} tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "#9ba3b0" }} />
+                            <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "#9ba3b0" }} width={30} />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "#171b22",
+                                border: "1px solid #2e3340",
+                                borderRadius: "8px",
+                                color: "#e1e4ea",
+                                fontSize: "12px",
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey={seriesKey}
+                              stroke={color.stroke}
+                              strokeWidth={1.5}
+                              fill={`url(#${color.gradient})`}
+                              dot={false}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <section className="min-w-0 flex-1">
-                  <div className="h-12 px-4 border-b border-rc-border flex items-center">
-                    <p className="text-sm text-rc-textMuted">
-                      TruthSayer AI <span className="text-rc-textDim px-1">/</span> Charts <span className="text-rc-textDim px-1">/</span>{" "}
-                      <span className="text-white font-medium">{selectedHeader || "Revenue"}</span>
-                    </p>
-                  </div>
-
-                  <div className="p-4 sm:p-6">
-                    {(() => {
-                      const selectedChart =
-                        processedData.timeSeriesCharts.find((chart) => chart.series[0]?.key === selectedHeader) ||
-                        processedData.timeSeriesCharts[0];
-
-                      const selectedSeries = selectedChart.series[0];
-                      const seriesKey = selectedSeries.key;
-                      const tablePoints = selectedChart.data.slice(-10);
-
-                      return (
-                        <>
-                          <div className="flex items-start justify-between gap-3 mb-4">
-                            <h2 className="text-4xl font-semibold tracking-tight text-white">
-                              {selectedHeader || selectedChart.title.replace(" Over Time", "")}
-                            </h2>
-                            <div className="hidden sm:flex items-center gap-2">
-                              <button className="px-3 py-1.5 rounded-lg border border-rc-border text-sm text-white bg-[#11151d] hover:bg-[#171c26] transition-colors">
-                                Save chart
-                              </button>
-                              <button className="px-3 py-1.5 rounded-lg border border-rc-border text-sm text-white bg-[#11151d] hover:bg-[#171c26] transition-colors">
-                                Share
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2 mb-4">
-                            <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-rc-border bg-[#11151d] text-xs text-white">
-                              <Filter className="w-3.5 h-3.5" /> Filter <ChevronDown className="w-3 h-3" />
-                            </button>
-                            <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-rc-border bg-[#11151d] text-xs text-white">
-                              <SlidersHorizontal className="w-3.5 h-3.5" /> Segment <ChevronDown className="w-3 h-3" />
-                            </button>
-                            <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-rc-border bg-[#11151d] text-xs text-white">
-                              <Calendar className="w-3.5 h-3.5" /> Last 90 days <ChevronDown className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          <div className="rounded-lg border border-rc-border bg-[#10141b] p-3 sm:p-4">
-                            <div className="h-[360px] sm:h-[400px]">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={selectedChart.data} margin={{ top: 8, right: 8, left: 0, bottom: 6 }}>
-                                  <defs>
-                                    <linearGradient id="analyticsRevenueArea" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#00d18f" stopOpacity={0.35} />
-                                      <stop offset="95%" stopColor="#00d18f" stopOpacity={0.03} />
-                                    </linearGradient>
-                                  </defs>
-                                  <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" vertical={false} />
-                                  <XAxis
-                                    dataKey={selectedChart.dateKey}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 12, fill: "#9ba3b0" }}
-                                  />
-                                  <YAxis
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 12, fill: "#9ba3b0" }}
-                                    tickFormatter={(value) => `US$${Number(value).toFixed(0)}`}
-                                  />
-                                  <Tooltip
-                                    contentStyle={{
-                                      backgroundColor: "#171b22",
-                                      border: "1px solid #2e3340",
-                                      borderRadius: "8px",
-                                      color: "#e1e4ea",
-                                      fontSize: "12px",
-                                    }}
-                                  />
-                                  <Area
-                                    type="monotone"
-                                    dataKey={seriesKey}
-                                    stroke="#00d18f"
-                                    strokeWidth={2}
-                                    fill="url(#analyticsRevenueArea)"
-                                    dot={false}
-                                  />
-                                </AreaChart>
-                              </ResponsiveContainer>
-                            </div>
-
-                            <div className="mt-4 border-t border-rc-border pt-3 overflow-x-auto">
-                              <table className="w-full text-xs min-w-[860px]">
-                                <thead>
-                                  <tr className="text-rc-textMuted border-b border-rc-border">
-                                    <th className="text-left py-2 px-2 font-medium">Summary</th>
-                                    {tablePoints.map((point, idx) => (
-                                      <th key={idx} className="text-left py-2 px-2 font-medium whitespace-nowrap">
-                                        {String(point[selectedChart.dateKey] || "-")}
-                                      </th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <tr className="border-b border-rc-border/60">
-                                    <td className="py-2 px-2 text-white font-medium">{selectedSeries.label}</td>
-                                    {tablePoints.map((point, idx) => (
-                                      <td key={idx} className="py-2 px-2 text-white whitespace-nowrap">
-                                        US${Number(point[seriesKey] || 0).toFixed(0)}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                  <tr>
-                                    <td className="py-2 px-2 text-rc-textMuted">Transactions</td>
-                                    {tablePoints.map((point, idx) => (
-                                      <td key={idx} className="py-2 px-2 text-rc-textMuted whitespace-nowrap">
-                                        {Number(point.count || 0)}
-                                      </td>
-                                    ))}
-                                  </tr>
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </section>
-              </div>
+                );
+              })}
             </div>
           )}
         </div>
