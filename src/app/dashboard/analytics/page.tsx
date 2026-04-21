@@ -22,9 +22,7 @@ import {
   Calendar,
   ChevronDown,
   Filter,
-  Search,
   SlidersHorizontal,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -34,7 +32,6 @@ export default function AnalyticsPage() {
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedHeader, setSelectedHeader] = useState("");
-  const [searchCharts, setSearchCharts] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     dateRange: { start: "", end: "" },
     category: "all",
@@ -119,52 +116,26 @@ export default function AnalyticsPage() {
         <div className="p-3 sm:p-5 lg:p-6 dashboard-content-wrap">
           {processedData && (
             <div className="rounded-xl border border-rc-border bg-[#0f1218]/80 overflow-hidden">
-              <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] min-h-[720px]">
-                <aside className="border-r border-rc-border bg-[#0d1016]">
-                  <div className="h-12 px-4 flex items-center justify-between border-b border-rc-border">
-                    <h3 className="text-sm font-semibold text-white">Charts</h3>
-                    <Sparkles className="w-3.5 h-3.5 text-rc-textDim" />
+              <div className="flex flex-col min-h-[720px]">
+                <div className="h-12 px-4 border-b border-rc-border flex items-center gap-3 bg-[#0d1016]">
+                  <span className="text-sm text-rc-textMuted">Select metric:</span>
+                  <div className="relative inline-block">
+                    <select
+                      value={selectedHeader}
+                      onChange={(e) => setSelectedHeader(e.target.value)}
+                      className="px-3 py-1.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-white appearance-none cursor-pointer hover:bg-[#171c26] transition-colors pr-8"
+                    >
+                      {processedData.mapping.numericColumns.map((header) => (
+                        <option key={header} value={header}>
+                          {header}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-rc-textDim absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
+                </div>
 
-                  <div className="p-3 border-b border-rc-border">
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-rc-border bg-[#12161e]">
-                      <Search className="w-3.5 h-3.5 text-rc-textDim" />
-                      <input
-                        value={searchCharts}
-                        onChange={(e) => setSearchCharts(e.target.value)}
-                        placeholder="Search charts..."
-                        className="w-full bg-transparent text-sm text-rc-text placeholder:text-rc-textDim outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="p-3 space-y-2 max-h-[620px] overflow-y-auto">
-                    <p className="text-xs text-rc-textMuted font-semibold uppercase tracking-wide px-1">Headers</p>
-                    {processedData.mapping.numericColumns
-                      .filter((header) =>
-                        header.toLowerCase().includes(searchCharts.trim().toLowerCase())
-                      )
-                      .map((header) => {
-                        const isSelected = header === selectedHeader;
-                        return (
-                          <button
-                            key={header}
-                            onClick={() => setSelectedHeader(header)}
-                            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-sm border transition-colors ${
-                              isSelected
-                                ? "bg-[#151a22] border-rc-border text-white"
-                                : "bg-transparent border-transparent text-rc-textMuted hover:bg-[#141921] hover:text-white"
-                            }`}
-                          >
-                            <span className="w-2 h-2 rounded-full bg-[#00d18f] flex-shrink-0" />
-                            <span className="truncate">{header}</span>
-                          </button>
-                        );
-                      })}
-                  </div>
-                </aside>
-
-                <section className="min-w-0">
+                <section className="min-w-0 flex-1">
                   <div className="h-12 px-4 border-b border-rc-border flex items-center">
                     <p className="text-sm text-rc-textMuted">
                       TruthSayer AI <span className="text-rc-textDim px-1">/</span> Charts <span className="text-rc-textDim px-1">/</span>{" "}
