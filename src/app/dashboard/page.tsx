@@ -212,7 +212,7 @@ export default function DashboardPage() {
               />
 
               {/* Metric Cards + Category Breakdowns unified grid */}
-              {(processedData.metrics.length > 0 || processedData.categoryBreakdowns.length > 0) && (
+              {(processedData.metrics.length > 0 || processedData.categoryBreakdowns.length > 0 || processedData.timeSeriesCharts.length > 0) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {processedData.metrics
                     .filter((metric) =>
@@ -228,35 +228,29 @@ export default function DashboardPage() {
                     .map((bd) => (
                       <FlexBreakdown key={bd.title} breakdown={bd} />
                     ))}
-                </div>
-              )}
 
-              {/* Time Series Charts */}
-              {processedData.timeSeriesCharts.length > 0 && (
-                <>
-                  {/* First chart full width */}
-                  {(!searchQuery || processedData.timeSeriesCharts[0].title.toLowerCase().includes(searchQuery.toLowerCase())) && (
-                    <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" />
-                  )}
-
-                  {/* Remaining charts in grid */}
-                  {processedData.timeSeriesCharts.length > 1 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                      {processedData.timeSeriesCharts
-                        .slice(1)
-                        .filter((chart) =>
-                          !searchQuery || chart.title.toLowerCase().includes(searchQuery.toLowerCase())
-                        )
-                        .map((chart, i) => (
-                          <FlexChart
-                            key={chart.title}
-                            chart={chart}
-                            variant={i === processedData.timeSeriesCharts.length - 2 ? "bar" : "area"}
-                          />
-                        ))}
+                  {/* First chart spans full 3 columns */}
+                  {processedData.timeSeriesCharts.length > 0 &&
+                    (!searchQuery || processedData.timeSeriesCharts[0].title.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                    <div className="col-span-1 sm:col-span-2 lg:col-span-3">
+                      <FlexChart chart={processedData.timeSeriesCharts[0]} variant="area" tall />
                     </div>
                   )}
-                </>
+
+                  {/* Remaining charts — 2 per row inside the same grid */}
+                  {processedData.timeSeriesCharts.slice(1)
+                    .filter((chart) =>
+                      !searchQuery || chart.title.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                    .map((chart, i) => (
+                      <div key={chart.title} className="col-span-1 sm:col-span-1 lg:col-span-1">
+                        <FlexChart
+                          chart={chart}
+                          variant={i % 2 === 1 ? "bar" : "area"}
+                        />
+                      </div>
+                    ))}
+                </div>
               )}
 
               {/* Growth Chart */}

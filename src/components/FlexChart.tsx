@@ -16,6 +16,7 @@ import type { TimeSeriesChart } from "@/types";
 interface FlexChartProps {
   chart: TimeSeriesChart;
   variant?: "area" | "bar";
+  tall?: boolean;
 }
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -32,7 +33,7 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
+export default function FlexChart({ chart, variant = "area", tall = false }: FlexChartProps) {
   const { title, dateKey, series, data } = chart;
 
   return (
@@ -49,7 +50,7 @@ export default function FlexChart({ chart, variant = "area" }: FlexChartProps) {
         </div>
       </div>
 
-      <div className="h-[220px] sm:h-[300px]">
+      <div className={tall ? "h-[300px] sm:h-[420px]" : "h-[220px] sm:h-[280px]"}>
         <ResponsiveContainer width="100%" height="100%">
           {variant === "area" ? (
             <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
