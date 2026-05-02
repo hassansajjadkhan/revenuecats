@@ -153,8 +153,13 @@ export default function Sidebar() {
             <div className="ml-2 mt-1 space-y-1">
               {/* Charts Section */}
               <div className="px-1 py-1">
-                <div className="px-2 py-1.5 text-[11px] font-semibold text-[#6f7788] uppercase tracking-wide">Charts</div>
-                <div className="space-y-1">
+                <Link
+                  href="/dashboard/charts"
+                  className="px-2 py-1.5 text-[11px] font-semibold text-[#6f7788] uppercase tracking-wide hover:text-white transition-colors block"
+                >
+                  Charts
+                </Link>
+                <div className="space-y-1 mt-1">
                   {chartsMenu.map((category) => {
                     const CategoryIcon = category.icon;
                     const isCategoryOpen = expandedCharts[category.label];
