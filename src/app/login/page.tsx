@@ -4,6 +4,60 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
+import {
+  Github,
+  Figma,
+  Slack,
+  Mail,
+  Globe,
+  Code2,
+  Zap,
+  Database,
+  Cpu,
+  Lock,
+  Cloud,
+  Terminal,
+  Palette,
+  Smartphone,
+  BarChart3,
+  LogIn,
+  Settings,
+  Bell,
+  Users,
+  Folder,
+  Download,
+  Upload,
+  Search,
+  Filter,
+  Play,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  Copy,
+  Share2,
+  Heart,
+  Star,
+  MessageCircle,
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
+  Minus,
+  Clock,
+  Calendar,
+  MapPin,
+  TrendingUp,
+  PieChart,
+  AreaChart,
+  BarChart,
+  LineChart,
+  ShoppingCart,
+  CreditCard,
+  DollarSign,
+  Briefcase,
+  Layers,
+  Box,
+} from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -120,12 +174,51 @@ export default function LoginPage() {
       </section>
 
       <section className="hidden lg:flex items-center justify-center bg-[#141b2a] px-12">
-        <div className="grid grid-cols-6 gap-3 max-w-xl">
-          {Array.from({ length: 60 }).map((_, index) => (
+        <div className="grid grid-cols-6 gap-3 max-w-2xl">
+          {[
+            { Icon: Github, bg: "bg-black", icon: "text-white" },
+            { Icon: Figma, bg: "bg-[#a259ff]", icon: "text-white" },
+            { Icon: Slack, bg: "bg-[#e01e5a]", icon: "text-white" },
+            { Icon: Globe, bg: "bg-[#0066cc]", icon: "text-white" },
+            { Icon: Zap, bg: "bg-[#ffd700]", icon: "text-black" },
+            { Icon: Database, bg: "bg-[#336791]", icon: "text-white" },
+            { Icon: Code2, bg: "bg-[#f97316]", icon: "text-white" },
+            { Icon: Cpu, bg: "bg-[#1e1e1e]", icon: "text-[#00ff00]" },
+            { Icon: Cloud, bg: "bg-[#1f2937]", icon: "text-white" },
+            { Icon: Terminal, bg: "bg-black", icon: "text-[#00ff00]" },
+            { Icon: Palette, bg: "bg-[#ff6b6b]", icon: "text-white" },
+            { Icon: Smartphone, bg: "bg-[#4f46e5]", icon: "text-white" },
+            { Icon: BarChart3, bg: "bg-[#10b981]", icon: "text-white" },
+            { Icon: Bell, bg: "bg-[#f59e0b]", icon: "text-white" },
+            { Icon: Users, bg: "bg-[#8b5cf6]", icon: "text-white" },
+            { Icon: Lock, bg: "bg-[#ef4444]", icon: "text-white" },
+            { Icon: Settings, bg: "bg-[#6366f1]", icon: "text-white" },
+            { Icon: RefreshCw, bg: "bg-[#06b6d4]", icon: "text-white" },
+            { Icon: Heart, bg: "bg-[#ec4899]", icon: "text-white" },
+            { Icon: Star, bg: "bg-[#f59e0b]", icon: "text-white" },
+            { Icon: TrendingUp, bg: "bg-[#14b8a6]", icon: "text-white" },
+            { Icon: ShoppingCart, bg: "bg-[#d946ef]", icon: "text-white" },
+            { Icon: CreditCard, bg: "bg-[#06b6d4]", icon: "text-white" },
+            { Icon: DollarSign, bg: "bg-[#84cc16]", icon: "text-white" },
+            { Icon: PieChart, bg: "bg-[#f97316]", icon: "text-white" },
+            { Icon: Calendar, bg: "bg-[#0ea5e9]", icon: "text-white" },
+            { Icon: Search, bg: "bg-[#6366f1]", icon: "text-white" },
+            { Icon: Download, bg: "bg-[#10b981]", icon: "text-white" },
+            { Icon: Upload, bg: "bg-[#8b5cf6]", icon: "text-white" },
+            { Icon: CheckCircle2, bg: "bg-[#22c55e]", icon: "text-white" },
+            { Icon: Mail, bg: "bg-[#ea580c]", icon: "text-white" },
+            { Icon: Briefcase, bg: "bg-[#0066cc]", icon: "text-white" },
+            { Icon: Layers, bg: "bg-[#ec4899]", icon: "text-white" },
+            { Icon: Box, bg: "bg-[#f59e0b]", icon: "text-white" },
+            { Icon: MessageCircle, bg: "bg-[#3b82f6]", icon: "text-white" },
+            { Icon: LineChart, bg: "bg-[#14b8a6]", icon: "text-white" },
+          ].map(({ Icon, bg, icon }, index) => (
             <div
               key={index}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2e3440] to-[#1d2230] border border-white/10"
-            />
+              className={`w-16 h-16 rounded-2xl ${bg} flex items-center justify-center hover:scale-110 transition-transform duration-300 cursor-pointer`}
+            >
+              <Icon className={`w-7 h-7 ${icon}`} strokeWidth={1.5} />
+            </div>
           ))}
         </div>
       </section>
