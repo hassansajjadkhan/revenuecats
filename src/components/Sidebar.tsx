@@ -70,7 +70,13 @@ const chartsMenu = [
 
 const topNav = [
   { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Analytics", href: "#", icon: BarChart3, hasPanel: true },
+  { 
+    label: "Analytics", 
+    href: "#", 
+    icon: BarChart3, 
+    chevron: true,
+    isAnalytics: true // Special flag for nested chart categories
+  },
   { label: "Customers", href: "/dashboard/growth", icon: Users },
   { label: "Product Catalog", href: "#", icon: Boxes, chevron: true },
   { label: "Paywalls", href: "#", icon: CreditCard },
@@ -92,8 +98,6 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const [expandedCharts, setExpandedCharts] = useState<Record<string, boolean>>({});
-  const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
-  const [analyticsPanelTab, setAnalyticsPanelTab] = useState<"charts" | "benchmarks">("charts");
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -125,25 +129,83 @@ export default function Sidebar() {
     const Icon = item.icon;
     const isDropdownOpen = openDropdowns[item.label];
 
-    // Analytics panel button
-    if (item.hasPanel) {
+    // Analytics dropdown with chart categories
+    if (item.isAnalytics) {
       return (
-        <button
-          key={item.label}
-          onClick={() => setShowAnalyticsPanel(!showAnalyticsPanel)}
-          className={cn(
-            "w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
-            showAnalyticsPanel
-              ? "bg-[#171b22] text-white border border-rc-border"
-              : "text-[#b8c0cf] hover:text-white hover:bg-[#141821]"
+        <div key={item.label}>
+          <button
+            onClick={() => toggleDropdown(item.label)}
+            className={cn(
+              "w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
+              isDropdownOpen
+                ? "bg-[#171b22] text-white border border-rc-border"
+                : "text-[#b8c0cf] hover:text-white hover:bg-[#141821]"
+            )}
+          >
+            <span className="flex items-center gap-3">
+              <Icon className={cn("w-[16px] h-[16px] flex-shrink-0", isDropdownOpen && "text-white")} />
+              <span>{item.label}</span>
+            </span>
+            <ChevronDown className={cn("w-3.5 h-3.5 text-[#6f7788] transition-transform", isDropdownOpen && "rotate-180")} />
+          </button>
+
+          {isDropdownOpen && (
+            <div className="ml-2 mt-1 space-y-1">
+              {/* Charts Section */}
+              <div className="px-1 py-1">
+                <div className="px-2 py-1.5 text-[11px] font-semibold text-[#6f7788] uppercase tracking-wide">Charts</div>
+                <div className="space-y-1">
+                  {chartsMenu.map((category) => {
+                    const CategoryIcon = category.icon;
+                    const isCategoryOpen = expandedCharts[category.label];
+
+                    return (
+                      <div key={category.label}>
+                        <button
+                          onClick={() => toggleChartCategory(category.label)}
+                          className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded text-[12px] font-medium text-[#b8c0cf] hover:text-white hover:bg-[#141821] transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <CategoryIcon className={cn("w-3.5 h-3.5 flex-shrink-0", category.colorClass)} />
+                            <span>{category.label}</span>
+                          </span>
+                          <ChevronRight className={cn("w-3 h-3 text-[#6f7788] transition-transform", isCategoryOpen && "rotate-90")} />
+                        </button>
+
+                        {isCategoryOpen && (
+                          <div className="ml-2 mt-0.5 space-y-1 border-l border-[#2e3340] pl-2">
+                            {category.items.map((chartItem) => (
+                              <Link
+                                key={chartItem}
+                                href="#"
+                                className="block px-3 py-1 rounded text-[11px] text-[#8892a4] hover:text-white hover:bg-[#141821] transition-colors"
+                              >
+                                {chartItem}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Benchmarks Section */}
+              <div className="px-1 py-1">
+                <div className="px-2 py-1.5 text-[11px] font-semibold text-[#6f7788] uppercase tracking-wide">Benchmarks</div>
+                <div className="space-y-1">
+                  <Link
+                    href="#"
+                    className="block px-3 py-1.5 rounded text-[12px] font-medium text-[#8892a4] hover:text-white hover:bg-[#141821] transition-colors"
+                  >
+                    Coming soon
+                  </Link>
+                </div>
+              </div>
+            </div>
           )}
-        >
-          <span className="flex items-center gap-3">
-            <Icon className={cn("w-[16px] h-[16px] flex-shrink-0", showAnalyticsPanel && "text-white")} />
-            <span>{item.label}</span>
-          </span>
-          <ChevronDown className={cn("w-3.5 h-3.5 text-[#6f7788] transition-transform", showAnalyticsPanel && "rotate-180")} />
-        </button>
+        </div>
       );
     }
 
@@ -230,75 +292,7 @@ export default function Sidebar() {
     </>
   );
 
-  const analyticsPanelContent = (
-    <div className="flex flex-col h-full">
-      <div className="flex gap-1 px-3 pt-3 pb-2 border-b border-rc-border">
-        <button
-          onClick={() => setAnalyticsPanelTab("charts")}
-          className={cn(
-            "px-3 py-1.5 rounded text-xs font-medium",
-            analyticsPanelTab === "charts"
-              ? "bg-[#171b22] text-white border border-rc-border"
-              : "text-[#b8c0cf] hover:text-white"
-          )}
-        >
-          Charts
-        </button>
-        <button
-          onClick={() => setAnalyticsPanelTab("benchmarks")}
-          className={cn(
-            "px-3 py-1.5 rounded text-xs font-medium",
-            analyticsPanelTab === "benchmarks"
-              ? "bg-[#171b22] text-white border border-rc-border"
-              : "text-[#b8c0cf] hover:text-white"
-          )}
-        >
-          Benchmarks
-        </button>
-      </div>
-
-      {analyticsPanelTab === "charts" && (
-        <div className="flex-1 py-2 px-2.5 space-y-1 overflow-y-auto">
-          {chartsMenu.map((category) => {
-            const CategoryIcon = category.icon;
-
-            return (
-            <div key={category.label}>
-              <button
-                onClick={() => toggleChartCategory(category.label)}
-                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-[#b8c0cf] hover:text-white hover:bg-[#141821] transition-colors"
-              >
-                <span className="flex items-center gap-2">
-                  <CategoryIcon className={cn("w-3.5 h-3.5", category.colorClass)} />
-                  <span>{category.label}</span>
-                </span>
-                <ChevronRight className={cn("w-3 h-3 transition-transform", expandedCharts[category.label] && "rotate-90")} />
-              </button>
-              {expandedCharts[category.label] && (
-                <div className="ml-3 mt-0.5 space-y-1">
-                  {category.items.map((item) => (
-                    <Link
-                      key={item}
-                      href="#"
-                      className="block px-3 py-1.5 rounded text-[11px] text-[#8892a4] hover:text-white hover:bg-[#141821] transition-colors"
-                    >
-                      {item}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );})}
-        </div>
-      )}
-
-      {analyticsPanelTab === "benchmarks" && (
-        <div className="flex-1 py-4 px-4 text-center">
-          <p className="text-xs text-[#8892a4]">Benchmarks coming soon</p>
-        </div>
-      )}
-    </div>
-  );
+  const analyticsPanelContent = null; // No longer needed - charts are in sidebar dropdown
 
   return (
     <>
@@ -334,14 +328,7 @@ export default function Sidebar() {
         {sidebarContent}
       </aside>
 
-      {showAnalyticsPanel && (
-        <div className="fixed left-[248px] top-0 z-30 h-screen bg-[#0b0d12] border-r border-rc-border hidden lg:flex flex-col w-[280px]">
-          {analyticsPanelContent}
-        </div>
-      )}
-
       <div className="flex-shrink-0 hidden lg:block w-[248px]" />
-      {showAnalyticsPanel && <div className="flex-shrink-0 hidden lg:block w-[280px]" />}
     </>
   );
 }
