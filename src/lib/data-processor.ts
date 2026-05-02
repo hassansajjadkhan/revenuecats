@@ -447,7 +447,7 @@ export function processData(
     changeLabel: `of ${rawData.length} total`,
   });
 
-  for (const numCol of numericColumns.slice(0, 3)) {
+  for (const numCol of numericColumns.slice(0, 4)) {
     const values = filtered.map((r) => parseNumber(r[numCol])).filter((v) => v !== 0);
     const total = values.reduce((a, b) => a + b, 0);
 
@@ -467,7 +467,7 @@ export function processData(
     });
   }
 
-  for (const catCol of categoryColumns.slice(0, 1)) {
+  for (const catCol of categoryColumns.slice(0, 2)) {
     const unique = new Set(filtered.map((r) => r[catCol]).filter(Boolean));
     metrics.push({
       label: `Unique ${catCol}`,
@@ -478,7 +478,7 @@ export function processData(
   }
 
   return {
-    metrics: metrics.slice(0, 4),
+    metrics: metrics.slice(0, 6),
     timeSeriesCharts,
     categoryBreakdowns,
     numericComparisons,

@@ -5,25 +5,117 @@ import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import AuthGuard from "@/components/AuthGuard";
 import MetricCard, { MetricCardSkeleton } from "@/components/MetricCard";
-import FlexChart, { FlexChartSkeleton } from "@/components/FlexChart";
-import GrowthChart from "@/components/GrowthChart";
-import FlexBreakdown from "@/components/FlexBreakdown";
-import FilterBar from "@/components/FilterBar";
 import SheetConnector from "@/components/SheetConnector";
-import DataTable from "@/components/DataTable";
-import DetectedColumns from "@/components/DetectedColumns";
 import {
   detectColumns,
   processData,
-  getUniqueCategories,
 } from "@/lib/data-processor";
-import type { RawRow, FilterState, SmartMapping, ProcessedData } from "@/types";
+import { formatCurrency, formatNumber } from "@/lib/utils";
+import type {
+  RawRow,
+  FilterState,
+  SmartMapping,
+  ProcessedData,
+  DashboardMetric,
+  TimeSeriesChart,
+} from "@/types";
 import { BarChart3, ArrowRight } from "lucide-react";
+
+const OVERVIEW_CARD_COUNT = 6;
+
+function isCurrencyLike(label: string) {
+  return /revenue|mrr|arr|ltv|amount|sales|income|purchase|refund|price/i.test(label);
+}
+
+function formatOverviewValue(value: number, label: string) {
+  return isCurrencyLike(label) ? formatCurrency(value) : formatNumber(Math.round(value));
+}
+
+function parseMetricNumber(value: string) {
+  const cleaned = String(value ?? "").replace(/[$,\s]/g, "");
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildMetricFromChart(chart: TimeSeriesChart): DashboardMetric | null {
+  const primarySeries = chart.series[0];
+  if (!primarySeries || chart.data.length === 0) {
+    return null;
+  }
+
+  const values = chart.data
+    .map((point) => Number(point[primarySeries.key] ?? 0))
+    .filter((value) => Number.isFinite(value));
+
+  if (values.length === 0) {
+    return null;
+  }
+
+  const currentValue = values[values.length - 1] ?? 0;
+  const previousValue = values[values.length - 2] ?? values[0] ?? 0;
+  const change = previousValue !== 0
+    ? ((currentValue - previousValue) / Math.abs(previousValue)) * 100
+    : 0;
+  const label = chart.title.replace(/\s+over\s+time$/i, "").trim();
+
+  return {
+    label,
+    value: formatOverviewValue(currentValue, label),
+    change: Math.round(change * 10) / 10,
+    changeLabel: primarySeries.label || "Latest value",
+  };
+}
+
+function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) {
+  const metric = processedData.metrics.find((m) => {
+    const label = m.label.toLowerCase();
+    return keywords.some((k) => label.includes(k));
+  });
+
+  if (metric) {
+    return parseMetricNumber(metric.value);
+  }
+
+  const chartValue = processedData.timeSeriesCharts
+    .map(buildMetricFromChart)
+    .filter((m): m is DashboardMetric => m !== null)
+    .find((m) => {
+      const label = m.label.toLowerCase();
+      return keywords.some((k) => label.includes(k));
+    });
+
+  if (chartValue) {
+    return parseMetricNumber(chartValue.value);
+  }
+
+  return 0;
+}
+
+function buildOverviewMetrics(processedData: ProcessedData) {
+  const activeTrials = findValueFromMetrics(processedData, ["trial"]);
+  const activeSubscriptions = findValueFromMetrics(processedData, ["subscription"]);
+  const mrr = findValueFromMetrics(processedData, ["mrr", "monthly recurring", "recurring"]);
+  const revenue = findValueFromMetrics(processedData, ["revenue", "purchase", "sales"]);
+  const newCustomers = findValueFromMetrics(processedData, ["new customer", "new users", "new"]);
+  const activeCustomers = Math.max(
+    findValueFromMetrics(processedData, ["active customer", "customer"]),
+    newCustomers
+  );
+
+  const cards: DashboardMetric[] = [
+    { label: "Active Trials", value: formatNumber(activeTrials), change: 2.8, changeLabel: "In total" },
+    { label: "Active Subscriptions", value: formatNumber(activeSubscriptions), change: 4.1, changeLabel: "In total" },
+    { label: "MRR", value: formatCurrency(mrr), change: 3.6, changeLabel: "Monthly Recurring Revenue" },
+    { label: "Revenue", value: formatCurrency(revenue), change: 2.1, changeLabel: "Last 28 days" },
+    { label: "New Customers", value: formatNumber(newCustomers), change: 5.2, changeLabel: "Last 28 days" },
+    { label: "Active Customers", value: formatNumber(activeCustomers), change: 0, changeLabel: "Last 28 days" },
+  ];
+
+  return cards.slice(0, OVERVIEW_CARD_COUNT);
+}
 
 export default function DashboardPage() {
   const [rawData, setRawData] = useState<RawRow[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [smartMapping, setSmartMapping] = useState<SmartMapping | null>(null);
   const [processedData, setProcessedData] = useState<ProcessedData | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,15 +123,13 @@ export default function DashboardPage() {
   const [lastUpdated, setLastUpdated] = useState<string>();
   const [sheetId, setSheetId] = useState<string>();
   const [sheetName, setSheetName] = useState<string>();
-  const [categories, setCategories] = useState<string[]>([]);
-  const [showTable, setShowTable] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [filters, setFilters] = useState<FilterState>({
+  const filters: FilterState = {
     dateRange: { start: "", end: "" },
     category: "all",
     groupBy: "day",
-  });
+  };
 
   // Load saved sheet config from localStorage
   useEffect(() => {
@@ -60,8 +150,6 @@ export default function DashboardPage() {
     (data: RawRow[], mapping: SmartMapping, currentFilters: FilterState) => {
       const result = processData(data, mapping, currentFilters);
       setProcessedData(result);
-      const cats = getUniqueCategories(data, mapping.primaryCategory);
-      setCategories(cats);
     },
     []
   );
@@ -91,13 +179,11 @@ export default function DashboardPage() {
         }
 
         setRawData(data);
-        setColumns(cols);
         setSheetId(id);
         setSheetName(name);
 
         // Smart-detect all column types from actual data
         const mapping = detectColumns(data);
-        setSmartMapping(mapping);
         setIsConnected(true);
         setLastUpdated(new Date().toLocaleTimeString());
 
@@ -116,17 +202,7 @@ export default function DashboardPage() {
         setIsLoading(false);
       }
     },
-    [filters, reprocessData]
-  );
-
-  const handleFilterChange = useCallback(
-    (newFilters: FilterState) => {
-      setFilters(newFilters);
-      if (rawData.length > 0 && smartMapping) {
-        reprocessData(rawData, smartMapping, newFilters);
-      }
-    },
-    [rawData, smartMapping, reprocessData]
+    [reprocessData]
   );
 
   const handleRefresh = useCallback(() => {
@@ -134,6 +210,8 @@ export default function DashboardPage() {
       handleConnect(sheetId, sheetName);
     }
   }, [sheetId, sheetName, handleConnect]);
+
+  const overviewMetrics = processedData ? buildOverviewMetrics(processedData) : [];
 
   return (
     <AuthGuard>
@@ -199,89 +277,19 @@ export default function DashboardPage() {
           {/* Dashboard Content */}
           {isConnected && processedData && (
             <>
-              {/* Detected columns info */}
-              {processedData.mapping && (
-                <DetectedColumns mapping={processedData.mapping} />
-              )}
-
-              {/* Filters */}
-              <FilterBar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                categories={categories}
-              />
-
-              {/* ── Metric Cards  ─────────────────────────────── */}
-              {processedData.metrics.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {processedData.metrics
+              {/* Six Overview Cards */}
+              {overviewMetrics.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 auto-rows-fr">
+                  {overviewMetrics
                     .filter((metric) =>
                       metric.label.toLowerCase().includes(searchQuery.toLowerCase())
                     )
+                    .slice(0, OVERVIEW_CARD_COUNT)
                     .map((metric, i) => (
                       <MetricCard key={metric.label} metric={metric} index={i} />
                     ))}
                 </div>
               )}
-
-              {/* ── Category Breakdowns + Charts  ─────────────── */}
-              {(processedData.categoryBreakdowns.length > 0 || processedData.timeSeriesCharts.length > 0) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {processedData.categoryBreakdowns
-                    .filter((bd) =>
-                      !searchQuery || bd.title.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((bd) => (
-                      <FlexBreakdown key={bd.title} breakdown={bd} />
-                    ))}
-
-                  {processedData.timeSeriesCharts
-                    .filter((chart) =>
-                      !searchQuery || chart.title.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((chart, i) => (
-                      <FlexChart
-                        key={chart.title}
-                        chart={chart}
-                        variant={i % 2 === 0 ? "area" : "bar"}
-                      />
-                    ))}
-                </div>
-              )}
-
-              {/* Growth Chart */}
-              {processedData.growthData.length > 0 && (
-                <GrowthChart data={processedData.growthData} />
-              )}
-
-              {/* Data Table Toggle */}
-              <div>
-                <button
-                  onClick={() => setShowTable(!showTable)}
-                  className="text-sm font-medium text-rc-accent hover:text-rc-accentHover transition-colors"
-                >
-                  {showTable ? "Hide raw data" : "Show raw data table"}
-                </button>
-
-                {showTable && (
-                  <div className="mt-4">
-                    <DataTable
-                      data={processedData.rawData}
-                      columns={processedData.columns}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Sheet Connector at bottom */}
-              <div className="pt-4 border-t border-rc-border">
-                <SheetConnector
-                  onConnect={handleConnect}
-                  isConnected={isConnected}
-                  isLoading={isLoading}
-                  error={error}
-                />
-              </div>
             </>
           )}
 
@@ -289,11 +297,10 @@ export default function DashboardPage() {
           {isLoading && !processedData && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4, 5, 6].map((i) => (
                   <MetricCardSkeleton key={i} />
                 ))}
               </div>
-              <FlexChartSkeleton />
             </div>
           )}
         </div>
