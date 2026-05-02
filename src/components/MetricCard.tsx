@@ -75,10 +75,10 @@ function Sparkline({ label, change, id }: { label: string; change: number; id: s
   const gradId = `sg-${id}`;
 
   return (
-    <div className="-mx-4 sm:-mx-5 mt-4">
+    <div className="-mx-3 sm:-mx-4 mt-2.5">
       <svg
         width="100%"
-        height="56"
+        height="40"
         viewBox="0 0 150 56"
         preserveAspectRatio="none"
       >
@@ -100,36 +100,23 @@ export default function MetricCard({ metric, index }: MetricCardProps) {
 
   return (
     <div
-      className="relative bg-rc-card rounded-xl border border-[#3a4150] px-4 sm:px-5 pt-4 sm:pt-5 pb-0 min-h-[198px] hover:border-[#4a5364] transition-all duration-200 animate-fade-in overflow-hidden"
+      className="relative bg-rc-card rounded-xl border border-[#3a4150] px-3 sm:px-4 pt-3 sm:pt-3.5 pb-0 min-h-[140px] hover:border-[#4a5364] transition-all duration-200 animate-fade-in overflow-hidden"
       style={{ animationDelay: `${index * 75}ms` }}
     >
       <div className="flex items-start justify-between">
-        <span className="text-[31px] leading-none sr-only"> </span>
-        <span className="text-[31px] leading-none sr-only"> </span>
-      </div>
-
-      <div className="flex items-start justify-between -mt-4">
-        <span className="text-[31px] leading-none sr-only"> </span>
-      </div>
-
-      <div className="flex items-start justify-between -mt-4">
-        <span className="text-[31px] leading-none sr-only"> </span>
-      </div>
-
-      <div className="flex items-start justify-between -mt-4">
-        <span className="text-[23px] font-semibold text-white tracking-tight">
+        <span className="text-sm font-medium text-white/90 tracking-tight">
           {metric.label}
         </span>
-        <Icon className="w-4 h-4 text-white/85 flex-shrink-0 mt-1" strokeWidth={1.8} />
+        <Icon className="w-4 h-4 text-white/75 flex-shrink-0" strokeWidth={1.8} />
       </div>
 
-      <div className="mt-5 text-[4.3rem] sm:text-[4.6rem] font-bold text-white leading-[0.95] tracking-[-0.03em]">
+      <div className="mt-2.5 text-3xl sm:text-4xl font-bold text-white leading-[1] tracking-[-0.02em]">
         {metric.prefix}{metric.value}{metric.suffix}
       </div>
 
-      <div className="flex items-center gap-1.5 mt-2 mb-0">
-        <span className="text-[30px] text-white/95 leading-none tracking-tight">{metric.changeLabel}</span>
-        <Info className="w-4 h-4 text-white/90 cursor-help flex-shrink-0" strokeWidth={2} />
+      <div className="flex items-center gap-1 mt-1.5 mb-0">
+        <span className="text-xs text-white/70 leading-none">{metric.changeLabel}</span>
+        <Info className="w-3.5 h-3.5 text-white/60 cursor-help flex-shrink-0" strokeWidth={2} />
       </div>
 
       <Sparkline label={metric.label} change={metric.change} id={`${index}`} />
@@ -139,14 +126,14 @@ export default function MetricCard({ metric, index }: MetricCardProps) {
 
 export function MetricCardSkeleton() {
   return (
-    <div className="bg-rc-card rounded-xl border border-[#3a4150] px-5 pt-5 pb-0 min-h-[198px]">
-      <div className="flex items-start justify-between mb-3">
-        <div className="h-4 w-28 skeleton rounded" />
+    <div className="bg-rc-card rounded-xl border border-[#3a4150] px-4 pt-3.5 pb-0 min-h-[140px]">
+      <div className="flex items-start justify-between mb-2">
+        <div className="h-3.5 w-24 skeleton rounded" />
         <div className="h-4 w-4 skeleton rounded" />
       </div>
-      <div className="h-10 w-36 skeleton rounded mt-5" />
-      <div className="h-4 w-24 skeleton rounded mt-3 mb-4" />
-      <div className="h-12 skeleton rounded-b" />
+      <div className="h-8 w-32 skeleton rounded mt-2" />
+      <div className="h-3 w-20 skeleton rounded mt-1.5 mb-2.5" />
+      <div className="h-10 skeleton rounded-b" />
     </div>
   );
 }
