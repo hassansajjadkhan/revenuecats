@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import AuthGuard from "@/components/AuthGuard";
 import MetricCard, { MetricCardSkeleton } from "@/components/MetricCard";
 import SheetConnector from "@/components/SheetConnector";
+import RecentTransactions from "@/components/RecentTransactions";
 import {
   detectColumns,
   processData,
@@ -288,6 +289,13 @@ export default function DashboardPage() {
                     .map((metric, i) => (
                       <MetricCard key={metric.label} metric={metric} index={i} />
                     ))}
+                </div>
+              )}
+
+              {/* Recent Transactions */}
+              {rawData.length > 0 && (
+                <div className="mt-8">
+                  <RecentTransactions data={rawData} limit={10} />
                 </div>
               )}
             </>
