@@ -219,17 +219,20 @@ export async function fetchSheetData(
 ): Promise<RawRow[]> {
   // Check if sheetName is actually a gid (all digits)
   if (sheetName && /^\d+$/.test(sheetName.trim())) {
-    console.log("Detected numeric gid input:", sheetName);
+    const gidNum = parseInt(sheetName.trim(), 10);
+    console.log("Detected numeric gid input, fetching from gid:", gidNum);
     try {
-      const data = await fetchSheetByGid(sheetId, parseInt(sheetName.trim(), 10));
-      if (data.length > 0) {
-        const columns = Object.keys(data[0] || {});
-        console.log("Successfully fetched from gid:", { gid: sheetName, columns });
-        return data;
+      const data = await fetchSheetByGid(sheetId, gidNum);
+      if (data.length === 0) {
+        throw new Error(`Sheet with gid ${gidNum} is empty or doesn't exist`);
       }
+      const columns = Object.keys(data[0] || {});
+      console.log("Successfully fetched from gid:", { gid: sheetName, columns: columns.length, rows: data.length });
+      return data;
     } catch (e) {
       console.error("Failed to fetch from gid:", e);
-      throw e;
+      // Don't fall back - if user specified a gid, they want that sheet
+      throw new Error(`Cannot access sheet with gid ${gidNum}. Make sure the gid is correct and the sheet is shared.`);
     }
   }
 
