@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { fetchSheetData } from "@/lib/google-sheets";
 import { detectColumns, processData, isPreAggregatedMetricsSheet, getPreAggregatedMetrics } from "@/lib/data-processor";
 import type { RawRow, ChartDataPoint } from "@/types";
 
 // Mark this route as dynamic since it depends on query parameters
 export const dynamic = "force-dynamic";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 interface ChartResponse {
   data: ChartDataPoint[];
@@ -59,47 +56,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch sheet data
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Use Google Sheets API via Supabase
+    // Fetch sheet data directly using the library function
     let data: RawRow[] = [];
 
     try {
-      // Fallback: Construct data from sheet fetch endpoint
-      const response = await fetch(
-        `/api/sheets?sheetId=${sheetId}${sheetName ? `&sheetName=${encodeURIComponent(sheetName)}` : ""}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch sheet data");
-      }
-
-      const { data: fetchedData } = await response.json();
-      data = fetchedData;
+      data = await fetchSheetData(sheetId, sheetName || undefined);
     } catch (error) {
       console.error("Error fetching sheet data:", error);
-      // Try again with simpler fetch
-      try {
-        const fallbackResponse = await fetch(
-          `/api/sheets?sheetId=${sheetId}${sheetName ? `&sheetName=${encodeURIComponent(sheetName)}` : ""}`
-        );
-
-        if (!fallbackResponse.ok) {
-          return NextResponse.json(
-            { error: "Failed to fetch sheet data" },
-            { status: 500 }
-          );
-        }
-
-        const { data: fetchedData } = await fallbackResponse.json();
-        data = fetchedData;
-      } catch {
-        return NextResponse.json(
-          { error: "Failed to fetch sheet data" },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Failed to fetch sheet data" },
+        { status: 500 }
+      );
     }
 
     if (!data || data.length === 0) {

@@ -93,15 +93,32 @@ function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) 
 }
 
 function buildOverviewMetrics(processedData: ProcessedData) {
-  const activeTrials = findValueFromMetrics(processedData, ["trial"]);
-  const activeSubscriptions = findValueFromMetrics(processedData, ["subscription"]);
-  const mrr = findValueFromMetrics(processedData, ["mrr", "monthly recurring", "recurring"]);
-  const revenue = findValueFromMetrics(processedData, ["revenue", "purchase", "sales"]);
-  const newCustomers = findValueFromMetrics(processedData, ["new customer", "new users", "new"]);
-  const activeCustomers = Math.max(
-    findValueFromMetrics(processedData, ["active customer", "customer"]),
-    newCustomers
-  );
+  // For pre-aggregated data, extract directly from time series charts
+  const getMetricFromChart = (keywords: string[]): number => {
+    for (const chart of processedData.timeSeriesCharts) {
+      const chartTitle = chart.title.toLowerCase();
+      const matches = keywords.some(k => chartTitle.includes(k));
+      
+      if (matches && chart.data.length > 0) {
+        const lastPoint = chart.data[chart.data.length - 1];
+        const seriesKey = chart.series[0]?.key;
+        if (seriesKey) {
+          const value = lastPoint[seriesKey];
+          if (typeof value === 'number') {
+            return value;
+          }
+        }
+      }
+    }
+    return 0;
+  };
+
+  const activeTrials = getMetricFromChart(["trial", "active trial"]);
+  const activeSubscriptions = getMetricFromChart(["subscription", "active subscription"]);
+  const mrr = getMetricFromChart(["mrr", "monthly recurring"]);
+  const revenue = getMetricFromChart(["revenue", "cumulative"]);
+  const newCustomers = getMetricFromChart(["new customer", "new paid"]);
+  const activeCustomers = getMetricFromChart(["active customer", "customer"]);
 
   const cards: DashboardMetric[] = [
     { label: "Active Trials", value: formatNumber(activeTrials), change: 2.8, changeLabel: "In total" },
@@ -114,6 +131,7 @@ function buildOverviewMetrics(processedData: ProcessedData) {
 
   return cards.slice(0, OVERVIEW_CARD_COUNT);
 }
+
 
 export default function DashboardPage() {
   const [rawData, setRawData] = useState<RawRow[]>([]);
