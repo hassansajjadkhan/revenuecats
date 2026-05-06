@@ -20,8 +20,17 @@ export async function fetchAvailableSheets(
   
   console.log("Scanning for available sheets in:", sheetId);
   
-  // Try gid values from 0 to 20 (covers most cases)
-  for (let gid = 0; gid <= 20; gid++) {
+  // Try gid values from 0 to 200 to catch all sheets
+  // Stop early if we find several consecutive empty sheets
+  let consecutiveEmpty = 0;
+  const maxConsecutiveEmpty = 10;
+  
+  for (let gid = 0; gid <= 200; gid++) {
+    if (consecutiveEmpty >= maxConsecutiveEmpty) {
+      console.log("Stopping scan - too many empty sheets in a row");
+      break;
+    }
+    
     try {
       const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
       
@@ -29,9 +38,21 @@ export async function fetchAvailableSheets(
         next: { revalidate: 60 },
       });
       
-      if (!response.ok) continue;
+      if (!response.ok) {
+        consecutiveEmpty++;
+        continue;
+      }
       
       const csvText = await response.text();
+      
+      // Check if response is actually empty or just whitespace
+      if (!csvText || csvText.trim().length < 5) {
+        consecutiveEmpty++;
+        continue;
+      }
+      
+      // Reset counter when we find data
+      consecutiveEmpty = 0;
       
       // Parse to get column info
       const data = await new Promise<RawRow[]>((resolve) => {
@@ -47,42 +68,49 @@ export async function fetchAvailableSheets(
         });
       });
       
-      if (data.length > 0) {
-        const columns = Object.keys(data[0] || {});
-        
-        // Try to infer the sheet name from first column or data
-        let sheetName = `Sheet ${gid}`;
-        
-        // Check if columns look like they have a sheet identifier
-        if (columns.length > 0) {
-          // Look for common patterns in column names
-          if (columns.some(c => /date|revenue|arr|mrr|subscription/i.test(c))) {
-            sheetName = "RevenueCat.APP DATA";
-          } else if (columns.length === 1 && columns[0].toLowerCase() === 'users') {
-            sheetName = "Users";
-          } else if (columns[0]) {
-            sheetName = columns[0];
-          }
-        }
-        
-        sheets.push({
-          gid,
-          name: sheetName,
-          rowCount: data.length,
-          columnCount: columns.length,
-          columns,
-          preview: columns.join(", "),
-        });
-        
-        console.log("Found sheet:", { gid, name: sheetName, columns: columns.length, rows: data.length });
+      if (data.length === 0) {
+        consecutiveEmpty++;
+        continue;
       }
+      
+      const columns = Object.keys(data[0] || {});
+      
+      if (columns.length === 0) {
+        consecutiveEmpty++;
+        continue;
+      }
+      
+      // Try to infer the sheet name from first column or data
+      let sheetName = `Sheet ${gid}`;
+      
+      // Check if columns look like they have a sheet identifier
+      if (columns.some(c => /date|revenue|arr|mrr|subscription|customer|trial|refund/i.test(c))) {
+        sheetName = "RevenueCat.APP DATA";
+      } else if (columns.length === 1 && columns[0].toLowerCase() === 'users') {
+        sheetName = "Users";
+      } else if (columns[0] && !columns[0].match(/^\s*$/)) {
+        // Use first column name as hint for sheet type
+        sheetName = columns[0].length > 20 ? `Sheet ${gid}` : columns[0];
+      }
+      
+      sheets.push({
+        gid,
+        name: sheetName,
+        rowCount: data.length,
+        columnCount: columns.length,
+        columns,
+        preview: columns.slice(0, 5).join(", ") + (columns.length > 5 ? "..." : ""),
+      });
+      
+      console.log("Found sheet:", { gid, name: sheetName, columns: columns.length, rows: data.length });
     } catch (e) {
-      // Continue to next gid
+      consecutiveEmpty++;
+      console.log(`Error scanning gid ${gid}:`, e);
       continue;
     }
   }
   
-  console.log("Available sheets found:", sheets);
+  console.log("Available sheets found:", sheets.length, sheets);
   return sheets;
 }
 

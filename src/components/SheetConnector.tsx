@@ -180,38 +180,49 @@ export default function SheetConnector({
         </div>
 
         {/* Available Sheets List */}
-        {showSheetPicker && availableSheets.length > 0 && (
+        {showSheetPicker && (
           <div className="p-4 rounded-lg bg-[#0a1219] border border-[#2a3d5f] space-y-2">
-            <p className="text-xs font-medium text-[#d4dff0] mb-3">
-              Found {availableSheets.length} sheet{availableSheets.length !== 1 ? 's' : ''} — select one to connect:
-            </p>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {availableSheets.map((sheet) => (
-                <button
-                  key={sheet.gid}
-                  onClick={() => handleSelectSheet(sheet)}
-                  disabled={isLoading}
-                  className="w-full text-left p-3 rounded-lg bg-[#1a2642] border border-[#2a3d5f] hover:border-[#4a6d8f] hover:bg-[#1f2d4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-[#a5d8ff]">{sheet.name}</p>
-                      <p className="text-xs text-[#8ca6d3] mt-1">
-                        {sheet.rowCount} rows × {sheet.columnCount} columns
-                      </p>
-                      <p className="text-xs text-[#6a8aad] mt-1 truncate">
-                        Columns: {sheet.preview}
-                      </p>
-                    </div>
-                    {isLoading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-rc-accent" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-[#6a8aad]" />
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
+            {isScanningSheets ? (
+              <div className="flex items-center gap-2 text-[#a5d8ff]">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <p className="text-sm">Scanning sheets...</p>
+              </div>
+            ) : availableSheets.length > 0 ? (
+              <>
+                <p className="text-xs font-medium text-[#d4dff0] mb-3">
+                  Found {availableSheets.length} sheet{availableSheets.length !== 1 ? 's' : ''} — select one to connect:
+                </p>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {availableSheets.map((sheet) => (
+                    <button
+                      key={sheet.gid}
+                      onClick={() => handleSelectSheet(sheet)}
+                      disabled={isLoading}
+                      className="w-full text-left p-3 rounded-lg bg-[#1a2642] border border-[#2a3d5f] hover:border-[#4a6d8f] hover:bg-[#1f2d4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-[#a5d8ff]">{sheet.name}</p>
+                          <p className="text-xs text-[#8ca6d3] mt-1">
+                            {sheet.rowCount} rows × {sheet.columnCount} columns
+                          </p>
+                          <p className="text-xs text-[#6a8aad] mt-1 truncate">
+                            Columns: {sheet.preview}
+                          </p>
+                        </div>
+                        {isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-rc-accent" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-[#6a8aad]" />
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-[#8ca6d3]">No sheets found. Make sure your spreadsheet is shared publicly.</p>
+            )}
           </div>
         )}
 
