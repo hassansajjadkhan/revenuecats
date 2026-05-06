@@ -37,8 +37,8 @@ export default function SheetConnector({
   };
 
   const handleQuickConnect = () => {
-    // RevenueCat.APP DATA sheet
-    onConnect("1674803177", "RevenueCat.APP DATA");
+    // User's personal RevenueCat sheet
+    onConnect("19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA");
   };
 
   return (
@@ -56,10 +56,10 @@ export default function SheetConnector({
           ) : (
             <CheckCircle2 className="w-4 h-4" />
           )}
-          Connect RevenueCat.APP DATA Sheet
+          Connect My Sheet
         </button>
         <p className="text-xs text-[#8ca6d3] mt-2">
-          Instantly connect to your RevenueCat metrics (ID: 1674803177)
+          Instantly connect to your RevenueCat metrics (ID: 19Wiql_-e8FoJS2MfjeHL...)
         </p>
       </div>
 
