@@ -18,10 +18,114 @@ export async function fetchAvailableSheets(
 ): Promise<AvailableSheet[]> {
   const sheets: AvailableSheet[] = [];
   
-  console.log("Scanning for available sheets in:", sheetId);
+  console.log("Fetching sheet metadata for:", sheetId);
   
-  // Try gid values from 0 to 500 to catch all sheets
-  // Stop only after we've gone 20+ past the last found sheet
+  try {
+    // Fetch the sheet's JSON metadata
+    // Google Sheets embeds all sheet info in the page HTML
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/edit?usp=sharing`;
+    const response = await fetch(sheetUrl);
+    const html = await response.text();
+    
+    // Extract sheet metadata from the HTML
+    // Look for the JSON that contains sheet properties
+    const match = html.match(/"sheets":\s*\[([\s\S]*?)\]/);
+    if (!match) {
+      console.log("Could not find sheets metadata in HTML, falling back to sequential scan");
+      return await fallbackSequentialScan(sheetId);
+    }
+    
+    // Try to parse the JSON
+    const sheetsJson = `[${match[1]}]`;
+    const parsedSheets = JSON.parse(sheetsJson);
+    
+    console.log("Found sheet metadata:", parsedSheets.length, "sheets");
+    
+    // Extract gid and title from each sheet
+    for (const sheet of parsedSheets) {
+      const gid = sheet.properties?.sheetId ?? 0;
+      const title = sheet.properties?.title ?? `Sheet ${gid}`;
+      
+      try {
+        // Fetch data for this sheet
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
+        const csvResponse = await fetch(csvUrl, {
+          next: { revalidate: 60 },
+        });
+        
+        if (!csvResponse.ok) {
+          console.log(`Could not fetch sheet ${title} (gid=${gid})`);
+          continue;
+        }
+        
+        const csvText = await csvResponse.text();
+        
+        if (!csvText || csvText.trim().length < 5) {
+          console.log(`Sheet ${title} (gid=${gid}) appears empty`);
+          continue;
+        }
+        
+        // Parse CSV to get columns and row count
+        const data = await new Promise<RawRow[]>((resolve) => {
+          Papa.parse<RawRow>(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            dynamicTyping: false,
+            transformHeader: (h) => h.trim(),
+            complete: (results) => {
+              resolve(results.data);
+            },
+            error: () => resolve([]),
+          });
+        });
+        
+        if (data.length === 0) {
+          console.log(`Sheet ${title} (gid=${gid}) has no data rows`);
+          continue;
+        }
+        
+        const columns = Object.keys(data[0] || {});
+        
+        if (columns.length === 0) {
+          console.log(`Sheet ${title} (gid=${gid}) has no columns`);
+          continue;
+        }
+        
+        sheets.push({
+          gid,
+          name: title,
+          rowCount: data.length,
+          columnCount: columns.length,
+          columns,
+          preview: columns.slice(0, 5).join(", ") + (columns.length > 5 ? "..." : ""),
+        });
+        
+        console.log("Loaded sheet:", { gid, name: title, columns: columns.length, rows: data.length });
+      } catch (e) {
+        console.log(`Error loading sheet ${title}:`, e);
+        continue;
+      }
+    }
+    
+    console.log("Available sheets found:", sheets.length, sheets);
+    return sheets;
+  } catch (e) {
+    console.log("Error fetching sheet metadata:", e);
+    console.log("Falling back to sequential scan...");
+    return await fallbackSequentialScan(sheetId);
+  }
+}
+
+/**
+ * Fallback: Try gid values sequentially
+ */
+async function fallbackSequentialScan(
+  sheetId: string
+): Promise<AvailableSheet[]> {
+  const sheets: AvailableSheet[] = [];
+  
+  console.log("Starting sequential scan fallback for:", sheetId);
+  
   let lastFoundAt = -1;
   
   for (let gid = 0; gid <= 500; gid++) {
@@ -44,12 +148,10 @@ export async function fetchAvailableSheets(
       
       const csvText = await response.text();
       
-      // Check if response is actually empty or just whitespace
       if (!csvText || csvText.trim().length < 5) {
         continue;
       }
       
-      // Parse to get column info
       const data = await new Promise<RawRow[]>((resolve) => {
         Papa.parse<RawRow>(csvText, {
           header: true,
@@ -73,19 +175,15 @@ export async function fetchAvailableSheets(
         continue;
       }
       
-      // Update last found position
       lastFoundAt = gid;
       
-      // Try to infer the sheet name from first column or data
       let sheetName = `Sheet ${gid}`;
       
-      // Check if columns look like they have a sheet identifier
       if (columns.some(c => /date|revenue|arr|mrr|subscription|customer|trial|refund/i.test(c))) {
         sheetName = "RevenueCat.APP DATA";
       } else if (columns.length === 1 && columns[0].toLowerCase() === 'users') {
         sheetName = "Users";
       } else if (columns[0] && !columns[0].match(/^\s*$/)) {
-        // Use first column name as hint for sheet type
         sheetName = columns[0].length > 20 ? `Sheet ${gid}` : columns[0];
       }
       
@@ -105,7 +203,7 @@ export async function fetchAvailableSheets(
     }
   }
   
-  console.log("Available sheets found:", sheets.length, sheets);
+  console.log("Fallback scan found:", sheets.length, "sheets");
   return sheets;
 }
 
