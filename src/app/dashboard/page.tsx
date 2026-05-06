@@ -230,6 +230,20 @@ export default function DashboardPage() {
     }
   }, [sheetId, sheetName, handleConnect]);
 
+  const handleDisconnect = useCallback(() => {
+    // Clear all sheet-related localStorage
+    localStorage.removeItem("dashboard_sheet_config");
+    localStorage.removeItem("connected_sheet_id");
+    
+    // Reset state
+    setRawData([]);
+    setProcessedData(null);
+    setIsConnected(false);
+    setSheetId(undefined);
+    setSheetName(undefined);
+    setLastUpdated(undefined);
+  }, []);
+
   const overviewMetrics = processedData ? buildOverviewMetrics(processedData) : [];
   const detectedColumns = processedData?.timeSeriesCharts.map(c => c.title) || [];
 
@@ -267,7 +281,15 @@ export default function DashboardPage() {
           {/* Show detected columns after connection for verification */}
           {isConnected && detectedColumns.length > 0 && (
             <div className="p-4 rounded-lg bg-[#111b2e] border border-[#243147] text-xs text-[#b1c5e8]">
-              <p className="font-medium text-[#d4dff0] mb-2">Detected Metrics ({detectedColumns.length}):</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-medium text-[#d4dff0]">Detected Metrics ({detectedColumns.length}):</p>
+                <button
+                  onClick={handleDisconnect}
+                  className="text-xs px-3 py-1 rounded bg-[#1a2d42] text-[#ff9999] hover:bg-[#2a3d52] border border-[#3a4d62] transition-colors"
+                >
+                  Disconnect
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {detectedColumns.map((col) => (
                   <span key={col} className="px-2.5 py-1 rounded bg-[#1a2642] text-[#a8beea] border border-[#2a3d5f]">
@@ -275,7 +297,7 @@ export default function DashboardPage() {
                   </span>
                 ))}
               </div>
-              <p className="text-[#8ca6d3] mt-3">If these don't look right, check that you connected the correct sheet.</p>
+              <p className="text-[#8ca6d3] mt-3">If these don't look right, disconnect and try again with the correct sheet.</p>
             </div>
           )}
 
