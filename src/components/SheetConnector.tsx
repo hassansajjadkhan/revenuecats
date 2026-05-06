@@ -104,24 +104,24 @@ export default function SheetConnector({
       </button>
 
       {showHelp && (
-        <div className="mb-4 p-4 bg-[#111b2e] rounded-lg text-sm text-[#b1c5e8] space-y-2 border border-[#293b5f]">
-          <p className="font-medium">Steps to connect:</p>
-          <ol className="list-decimal list-inside space-y-1 text-xs">
-            <li>Open your Google Sheet</li>
+        <div className="mb-4 p-4 bg-[#111b2e] rounded-lg text-sm text-[#b1c5e8] space-y-3 border border-[#293b5f]">
+          <p className="font-medium">How to find your RevenueCat.APP DATA sheet:</p>
+          <ol className="list-decimal list-inside space-y-2 text-xs">
             <li>
-              Make sure you're on the <strong>correct tab</strong> (RevenueCat.APP DATA)
+              Open your Google Sheet: <a href="https://docs.google.com/spreadsheets/d/19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA/edit" target="_blank" rel="noopener noreferrer" className="text-rc-accent hover:underline">Your Sheet</a>
             </li>
             <li>
-              Click <strong>Share</strong> → Change to{" "}
-              <strong>&quot;Anyone with the link&quot;</strong> (Viewer)
+              Click on the <strong>&quot;RevenueCat.APP DATA&quot;</strong> tab at the bottom
             </li>
-            <li>Copy the sheet URL and paste it below</li>
             <li>
-              Make sure your sheet has headers in the first row with column names
+              Look at the URL in your browser - you'll see <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=XXXXX</code> at the end (e.g., <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=1234567890</code>)
+            </li>
+            <li>
+              Enter the sheet name below as <strong>&quot;RevenueCat.APP DATA&quot;</strong> and click Connect
             </li>
           </ol>
-          <p className="text-xs text-[#8ca6d3] mt-2">
-            <strong>Tip:</strong> Open your sheet and click on the <strong>RevenueCat.APP DATA</strong> tab at the bottom to make sure you're viewing the correct data before connecting.
+          <p className="text-xs text-[#8ca6d3] mt-2 border-t border-[#3a5a7f] pt-2">
+            ⚠️ <strong>Important:</strong> Make sure the sheet is shared with <strong>&quot;Anyone with the link&quot;</strong> (Viewer access). Your data stays secure — it's only fetched server-side.
           </p>
         </div>
       )}
@@ -164,9 +164,12 @@ export default function SheetConnector({
             type="text"
             value={sheetName}
             onChange={(e) => setSheetName(e.target.value)}
-            placeholder="Sheet1"
+            placeholder="e.g., RevenueCat.APP DATA"
             className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
           />
+          <p className="text-xs text-[#8ca6d3] mt-1.5">
+            To find the exact sheet name: Open your Google Sheet, click the tab at the bottom, and copy the exact name (e.g., "RevenueCat.APP DATA")
+          </p>
         </div>
       </div>
 
