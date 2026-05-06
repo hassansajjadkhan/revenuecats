@@ -237,28 +237,42 @@ function safeDateLabel(dateKey: string, groupBy: string): string {
 // ─── Pre-Aggregated Metrics Detection ───────────────────────────────────────
 
 const PRE_AGGREGATED_METRIC_PATTERNS = [
-  "ARR", "MRR", "Revenue", "Cumulative Revenue", 
-  "Active Subscriptions", "New Customers", "Churn",
-  "Trials", "Realized LTV", "Non Subscription Purchases",
-  "Initial Conversion", "Conversion Rate", "Trial Conversion",
-  "Trial Conversion Rate", "Refund Rate", "Retention"
+  "ARR", "MRR", "Revenue", "Cumulative", 
+  "Subscriptions", "Customers", "Churn",
+  "Trials", "LTV", "Purchases",
+  "Conversion", "Retention", "Refund",
+  "Active", "New", "Movement", "Status", "Rate", "Survey"
 ];
 
 export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
   const lowerColumns = columns.map(c => c.toLowerCase());
-  const hasDate = lowerColumns.some(c => c.includes("date"));
-  const metricMatches = PRE_AGGREGATED_METRIC_PATTERNS.filter(p => 
-    lowerColumns.some(c => c.toLowerCase().includes(p.toLowerCase()))
-  ).length;
-  return hasDate && metricMatches >= 2;
+  
+  // Check if has a date column
+  const hasDate = lowerColumns.some(c => c.includes("date") || c.includes("period"));
+  if (!hasDate) return false;
+  
+  // Check for numeric columns (indicators of aggregated data)
+  const numericCount = columns.filter(col => {
+    const lower = col.toLowerCase();
+    // Exclude date columns and obvious text columns
+    if (lower.includes("date") || lower.includes("period") || lower.includes("name") || lower.includes("id")) {
+      return false;
+    }
+    // Should be a metric-like column
+    return PRE_AGGREGATED_METRIC_PATTERNS.some(p => lower.includes(p.toLowerCase()));
+  }).length;
+  
+  // If we have date + at least 3 metric columns, it's pre-aggregated
+  return hasDate && numericCount >= 3;
 }
 
 export function getPreAggregatedMetrics(columns: string[]): string[] {
   return columns.filter(col => {
     const lower = col.toLowerCase();
-    return PRE_AGGREGATED_METRIC_PATTERNS.some(p => 
-      lower.includes(p.toLowerCase())
-    ) && !lower.includes("date") && !lower.includes("count");
+    const isMetric = PRE_AGGREGATED_METRIC_PATTERNS.some(p => lower.includes(p.toLowerCase()));
+    const isNotDate = !lower.includes("date") && !lower.includes("period");
+    const isNotIdentifier = !lower.includes("id") && !lower.includes("customer") || lower.includes("new");
+    return isMetric && isNotDate && isNotIdentifier;
   });
 }
 
