@@ -234,6 +234,34 @@ function safeDateLabel(dateKey: string, groupBy: string): string {
   }
 }
 
+// ─── Pre-Aggregated Metrics Detection ───────────────────────────────────────
+
+const PRE_AGGREGATED_METRIC_PATTERNS = [
+  "ARR", "MRR", "Revenue", "Cumulative Revenue", 
+  "Active Subscriptions", "New Customers", "Churn",
+  "Trials", "Realized LTV", "Non Subscription Purchases",
+  "Initial Conversion", "Conversion Rate", "Trial Conversion",
+  "Trial Conversion Rate", "Refund Rate", "Retention"
+];
+
+export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
+  const lowerColumns = columns.map(c => c.toLowerCase());
+  const hasDate = lowerColumns.some(c => c.includes("date"));
+  const metricMatches = PRE_AGGREGATED_METRIC_PATTERNS.filter(p => 
+    lowerColumns.some(c => c.toLowerCase().includes(p.toLowerCase()))
+  ).length;
+  return hasDate && metricMatches >= 2;
+}
+
+export function getPreAggregatedMetrics(columns: string[]): string[] {
+  return columns.filter(col => {
+    const lower = col.toLowerCase();
+    return PRE_AGGREGATED_METRIC_PATTERNS.some(p => 
+      lower.includes(p.toLowerCase())
+    ) && !lower.includes("date") && !lower.includes("count");
+  });
+}
+
 export function processData(
   rawData: RawRow[],
   mapping: SmartMapping,
@@ -283,7 +311,42 @@ export function processData(
   // === TIME SERIES CHARTS ===
   const timeSeriesCharts: TimeSeriesChart[] = [];
 
-  if (primaryDate && numericColumns.length > 0) {
+  // Check if this is a pre-aggregated metrics sheet
+  const allColumns = Object.keys(filtered[0] || {});
+  const isPreAggregated = isPreAggregatedMetricsSheet(allColumns);
+  const preAggMetrics = isPreAggregated ? getPreAggregatedMetrics(allColumns) : [];
+
+  if (isPreAggregated && primaryDate && preAggMetrics.length > 0) {
+    // Handle pre-aggregated metrics directly as time-series data
+    for (const metricCol of preAggMetrics.slice(0, 10)) {
+      const chartData: ChartDataPoint[] = filtered
+        .filter(row => tryParseDate(row[primaryDate]))
+        .map(row => {
+          const dateVal = tryParseDate(row[primaryDate]);
+          const dateStr = dateVal ? format(dateVal, "yyyy-MM-dd") : "";
+          return {
+            date: safeDateLabel(dateStr, "day"),
+            [metricCol]: parseNumber(row[metricCol]),
+            raw_date: dateStr,
+          };
+        })
+        .filter(point => point.raw_date); // Remove entries with invalid dates
+
+      if (chartData.length > 0) {
+        timeSeriesCharts.push({
+          title: metricCol,
+          dateKey: "date",
+          series: [{
+            key: metricCol,
+            label: metricCol,
+            color: CHART_COLORS[timeSeriesCharts.length % CHART_COLORS.length],
+          }],
+          data: chartData,
+        });
+      }
+    }
+  } else if (primaryDate && numericColumns.length > 0) {
+    // Handle transaction-level data (original logic)
     for (const numCol of numericColumns.slice(0, 4)) {
       const aggregated = new Map<string, number>();
       const countByDate = new Map<string, number>();

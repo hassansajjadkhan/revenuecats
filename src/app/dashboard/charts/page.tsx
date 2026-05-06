@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import AuthGuard from "@/components/AuthGuard";
@@ -17,8 +17,11 @@ import {
   Search,
   BarChart3,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { cn, formatCurrency, formatNumber } from "@/lib/utils";
+import type { ChartDataPoint } from "@/types";
 
 const chartsMenu = [
   {
@@ -59,16 +62,71 @@ const chartsMenu = [
   },
 ];
 
-export default function ChartsPage() {
+interface ChartData {
+  data: ChartDataPoint[];
+  title: string;
+  series: Array<{
+    key: string;
+    label: string;
+    color: string;
+  }>;
+  metadata?: {
+    latest?: number;
+    average?: number;
+    change?: number;
+    min?: number;
+    max?: number;
+  };
+}
+
+function ChartsPageContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     Revenue: true,
-    Subscriptions: true,
   });
+  const [selectedChart, setSelectedChart] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sheetId, setSheetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("connected_sheet_id");
+    if (stored) setSheetId(stored);
+  }, []);
 
   const toggleCategory = (label: string) => {
     setExpandedCategories((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
+  const handleChartSelect = async (chartName: string) => {
+    if (!sheetId) {
+      setError("No sheet connected. Please connect a sheet in the Overview tab.");
+      return;
+    }
+
+    setSelectedChart(chartName);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/chart?chart=${encodeURIComponent(chartName)}&sheetId=${encodeURIComponent(sheetId)}`);
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to fetch chart data");
+      }
+
+      const data = await response.json();
+      setChartData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load chart");
+      setChartData(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredCharts = chartsMenu.filter((category) => {
@@ -77,6 +135,14 @@ export default function ChartsPage() {
       category.items.some((item) => item.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesSearch;
   });
+
+  const isCurrencyMetric = (title: string) => {
+    return /revenue|arr|mrr|ltv|amount|sales|price|purchase/i.test(title);
+  };
+
+  const formatTooltipValue = (value: number, title: string) => {
+    return isCurrencyMetric(title) ? formatCurrency(value) : formatNumber(Math.round(value));
+  };
 
   return (
     <AuthGuard>
@@ -138,13 +204,18 @@ export default function ChartsPage() {
                         {isExpanded && (
                           <div className="mt-1 space-y-1 ml-2">
                             {category.items.map((item) => (
-                              <Link
+                              <button
                                 key={item}
-                                href={`/dashboard/charts/${category.label.toLowerCase().replace(/ /g, "-")}/${item.toLowerCase().replace(/ /g, "-")}`}
-                                className="block px-3 py-2 rounded-lg text-[12px] text-[#8892a4] hover:text-white hover:bg-[#1a1f2e] transition-colors truncate"
+                                onClick={() => handleChartSelect(item)}
+                                className={cn(
+                                  "w-full text-left px-3 py-2 rounded-lg text-[12px] transition-colors truncate",
+                                  selectedChart === item
+                                    ? "bg-[#1a1f2e] text-white font-medium"
+                                    : "text-[#8892a4] hover:text-white hover:bg-[#0f1218]"
+                                )}
                               >
                                 {item}
-                              </Link>
+                              </button>
                             ))}
                           </div>
                         )}
@@ -157,19 +228,185 @@ export default function ChartsPage() {
 
             {/* Main Content Area */}
             <div className="flex-1 p-6 lg:p-8">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
-                  <BarChart3 className="w-8 h-8 text-rc-textDim" />
+              {!sheetId ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="w-8 h-8 text-rc-textDim" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-white mb-2">No sheet connected</h2>
+                  <p className="text-sm text-rc-textMuted max-w-md mx-auto mb-6">
+                    Connect a Google Sheet in the Overview tab to view charts.
+                  </p>
+                  <Link
+                    href="/dashboard"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Go to Overview
+                  </Link>
                 </div>
-                <h2 className="text-lg font-semibold text-white mb-2">Select a chart</h2>
-                <p className="text-sm text-rc-textMuted max-w-md mx-auto">
-                  Choose a chart from the left panel to view detailed analytics and trends.
-                </p>
-              </div>
+              ) : !selectedChart ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="w-8 h-8 text-rc-textDim" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-white mb-2">Select a chart</h2>
+                  <p className="text-sm text-rc-textMuted max-w-md mx-auto">
+                    Choose a chart from the left panel to view detailed analytics and trends.
+                  </p>
+                </div>
+              ) : loading ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+                  <p className="text-sm text-rc-textMuted">Loading chart data...</p>
+                </div>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="w-8 h-8 text-red-500" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-white mb-2">Error loading chart</h2>
+                  <p className="text-sm text-red-400 max-w-md mx-auto text-center">{error}</p>
+                </div>
+              ) : chartData ? (
+                <div className="space-y-6">
+                  {/* Chart Header */}
+                  <div>
+                    <h2 className="text-2xl font-semibold text-white mb-2">{chartData.title}</h2>
+                    {chartData.metadata && (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {chartData.metadata.latest !== undefined && (
+                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
+                            <p className="text-[12px] text-[#8892a4] mb-1">Latest</p>
+                            <p className="text-lg font-semibold text-white">
+                              {formatTooltipValue(chartData.metadata.latest, chartData.title)}
+                            </p>
+                          </div>
+                        )}
+                        {chartData.metadata.average !== undefined && (
+                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
+                            <p className="text-[12px] text-[#8892a4] mb-1">Average</p>
+                            <p className="text-lg font-semibold text-white">
+                              {formatTooltipValue(chartData.metadata.average, chartData.title)}
+                            </p>
+                          </div>
+                        )}
+                        {chartData.metadata.change !== undefined && (
+                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
+                            <p className="text-[12px] text-[#8892a4] mb-1">Change</p>
+                            <p className={`text-lg font-semibold ${chartData.metadata.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {chartData.metadata.change >= 0 ? '+' : ''}{chartData.metadata.change.toFixed(1)}%
+                            </p>
+                          </div>
+                        )}
+                        {chartData.metadata.min !== undefined && (
+                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
+                            <p className="text-[12px] text-[#8892a4] mb-1">Min</p>
+                            <p className="text-lg font-semibold text-white">
+                              {formatTooltipValue(chartData.metadata.min, chartData.title)}
+                            </p>
+                          </div>
+                        )}
+                        {chartData.metadata.max !== undefined && (
+                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
+                            <p className="text-[12px] text-[#8892a4] mb-1">Max</p>
+                            <p className="text-lg font-semibold text-white">
+                              {formatTooltipValue(chartData.metadata.max, chartData.title)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chart */}
+                  <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-6">
+                    <ResponsiveContainer width="100%" height={400}>
+                      <AreaChart
+                        data={chartData.data}
+                        margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      >
+                        <defs>
+                          {chartData.series.map((series) => (
+                            <linearGradient
+                              key={series.key}
+                              id={`gradient-${series.key}`}
+                              x1="0"
+                              y1="0"
+                              x2="0"
+                              y2="1"
+                            >
+                              <stop
+                                offset="5%"
+                                stopColor={series.color}
+                                stopOpacity={0.3}
+                              />
+                              <stop
+                                offset="95%"
+                                stopColor={series.color}
+                                stopOpacity={0}
+                              />
+                            </linearGradient>
+                          ))}
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#6f7788"
+                          tick={{ fontSize: 12 }}
+                        />
+                        <YAxis
+                          stroke="#6f7788"
+                          tick={{ fontSize: 12 }}
+                          tickFormatter={(value) =>
+                            formatTooltipValue(value, chartData.title).split("$").pop() || ""
+                          }
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#141821",
+                            border: "1px solid #2e3340",
+                            borderRadius: "8px",
+                          }}
+                          labelStyle={{ color: "#white" }}
+                          formatter={(value) =>
+                            formatTooltipValue(value as number, chartData.title)
+                          }
+                        />
+                        {chartData.series.length > 0 && (
+                          <Legend
+                            wrapperStyle={{
+                              paddingTop: "20px",
+                            }}
+                          />
+                        )}
+                        {chartData.series.map((series) => (
+                          <Area
+                            key={series.key}
+                            type="monotone"
+                            dataKey={series.key}
+                            stroke={series.color}
+                            fill={`url(#gradient-${series.key})`}
+                            name={series.label}
+                            isAnimationActive={false}
+                          />
+                        ))}
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
         </main>
       </div>
     </AuthGuard>
+  );
+}
+
+export default function ChartsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChartsPageContent />
+    </Suspense>
   );
 }

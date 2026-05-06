@@ -188,11 +188,13 @@ export default function DashboardPage() {
         setIsConnected(true);
         setLastUpdated(new Date().toLocaleTimeString());
 
-        // Save config
+        // Save config to localStorage for both dashboard and charts pages
         localStorage.setItem(
           "dashboard_sheet_config",
           JSON.stringify({ sheetId: id, sheetName: name })
         );
+        // Also store sheet ID separately for charts page access
+        localStorage.setItem("connected_sheet_id", id);
 
         // Process data with detected mapping
         reprocessData(data, mapping, filters);
