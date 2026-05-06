@@ -11,9 +11,13 @@ export async function fetchSheetData(
 ): Promise<RawRow[]> {
   // Build the CSV export URL
   let url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv`;
+  
   if (sheetName) {
+    // For sheet names with special characters, we need to encode properly
     url += `&sheet=${encodeURIComponent(sheetName)}`;
   }
+
+  console.log("Fetching sheet data from:", { url, sheetId, sheetName });
 
   const response = await fetch(url, {
     next: { revalidate: 60 }, // Cache for 60 seconds
@@ -26,16 +30,28 @@ export async function fetchSheetData(
   }
 
   const csvText = await response.text();
+  
+  // Log the first 500 chars of CSV to debug
+  console.log("CSV data received (first 500 chars):", csvText.substring(0, 500));
+  console.log("CSV has", csvText.split('\n').length, "rows");
 
   return new Promise((resolve, reject) => {
     Papa.parse<RawRow>(csvText, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: false,
+      transformHeader: (h) => h.trim(), // Trim header names
       complete: (results) => {
         if (results.errors.length > 0) {
           console.warn("CSV parse warnings:", results.errors);
         }
+        
+        console.log("Parsed CSV:", {
+          rowCount: results.data.length,
+          columns: results.data.length > 0 ? Object.keys(results.data[0]) : [],
+          firstRow: results.data[0],
+        });
+        
         resolve(results.data);
       },
       error: (error: Error) => {

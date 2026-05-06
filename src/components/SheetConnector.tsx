@@ -109,17 +109,19 @@ export default function SheetConnector({
           <ol className="list-decimal list-inside space-y-1 text-xs">
             <li>Open your Google Sheet</li>
             <li>
+              Make sure you're on the <strong>correct tab</strong> (RevenueCat.APP DATA)
+            </li>
+            <li>
               Click <strong>Share</strong> → Change to{" "}
               <strong>&quot;Anyone with the link&quot;</strong> (Viewer)
             </li>
             <li>Copy the sheet URL and paste it below</li>
             <li>
-              Make sure your sheet has headers in the first row
+              Make sure your sheet has headers in the first row with column names
             </li>
           </ol>
           <p className="text-xs text-[#8ca6d3] mt-2">
-            Your data stays secure — it&apos;s only fetched server-side and never
-            stored.
+            <strong>Tip:</strong> Open your sheet and click on the <strong>RevenueCat.APP DATA</strong> tab at the bottom to make sure you're viewing the correct data before connecting.
           </p>
         </div>
       )}
