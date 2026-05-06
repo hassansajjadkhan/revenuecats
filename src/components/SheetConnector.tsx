@@ -40,6 +40,35 @@ export default function SheetConnector({
     onConnect("19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA", "RevenueCat.APP DATA");
   };
 
+  const handleConnectByGid = async () => {
+    // If user entered a gid (numbers only), use it directly
+    if (!sheetName.trim()) return;
+    
+    const id = extractSheetId(sheetUrl);
+    if (!id) return;
+    
+    // If sheetName looks like a gid (all digits), fetch that specific sheet
+    const isGid = /^\d+$/.test(sheetName.trim());
+    
+    if (isGid) {
+      // Try to fetch this specific gid
+      try {
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${sheetName.trim()}`;
+        const response = await fetch(csvUrl);
+        if (response.ok) {
+          // GID works, connect to it
+          onConnect(id, `Sheet ${sheetName}`);
+          return;
+        }
+      } catch (e) {
+        console.error("Error connecting to gid:", e);
+      }
+    }
+    
+    // Otherwise treat it as a sheet name
+    onConnect(id, sheetName);
+  };
+
   const handleScanSheets = async () => {
     const id = extractSheetId(sheetUrl);
     if (!id) return;
@@ -129,19 +158,22 @@ export default function SheetConnector({
 
       {showHelp && (
         <div className="mb-4 p-4 bg-[#111b2e] rounded-lg text-sm text-[#b1c5e8] space-y-3 border border-[#293b5f]">
-          <p className="font-medium">How to find your RevenueCat.APP DATA sheet:</p>
+          <p className="font-medium">How to find and connect to any sheet:</p>
           <ol className="list-decimal list-inside space-y-2 text-xs">
             <li>
-              Open your Google Sheet: <a href="https://docs.google.com/spreadsheets/d/19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA/edit" target="_blank" rel="noopener noreferrer" className="text-rc-accent hover:underline">Your Sheet</a>
+              Open your Google Sheet in the browser
             </li>
             <li>
-              Click on the <strong>&quot;RevenueCat.APP DATA&quot;</strong> tab at the bottom
+              Click on any sheet tab at the bottom (e.g., "RevenueCat.APP DATA", "Sheet 2", etc.)
             </li>
             <li>
-              Look at the URL in your browser - you'll see <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=XXXXX</code> at the end (e.g., <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=1234567890</code>)
+              Look at the URL — you'll see <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=XXXXX</code> or <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">?gid=XXXXX</code> (e.g., <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">#gid=1674803177</code>)
             </li>
             <li>
-              Enter the sheet name below as <strong>&quot;RevenueCat.APP DATA&quot;</strong> and click Connect
+              <strong>Option A (Recommended):</strong> Copy just the gid number (e.g., <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">1674803177</code>) into the "Sheet Name or GID" field and click Connect
+            </li>
+            <li>
+              <strong>Option B:</strong> Enter the sheet name (e.g., <code className="bg-[#0a1219] px-1.5 py-0.5 rounded text-[#a8beea]">RevenueCat.APP DATA</code>) if you prefer
             </li>
           </ol>
           <p className="text-xs text-[#8ca6d3] mt-2 border-t border-[#3a5a7f] pt-2">
@@ -156,88 +188,40 @@ export default function SheetConnector({
           <label className="block text-xs font-medium text-rc-textMuted mb-1.5">
             Google Sheet URL or ID
           </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-              className="flex-1 px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
-            />
-            <button
-              onClick={handleScanSheets}
-              disabled={!sheetUrl.trim() || isScanningSheets || isLoading}
-              className="px-4 py-2.5 bg-[#2a5a7f] text-[#a5d8ff] text-sm font-medium rounded-lg hover:bg-[#3a6a8f] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-            >
-              {isScanningSheets ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <ChevronRight className="w-4 h-4" />
-              )}
-              Scan Sheets
-            </button>
-          </div>
+          <input
+            type="text"
+            value={sheetUrl}
+            onChange={(e) => setSheetUrl(e.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/..."
+            className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
+          />
         </div>
-
-        {/* Available Sheets List */}
-        {showSheetPicker && (
-          <div className="p-4 rounded-lg bg-[#0a1219] border border-[#2a3d5f] space-y-2">
-            {isScanningSheets ? (
-              <div className="flex items-center gap-2 text-[#a5d8ff]">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <p className="text-sm">Scanning sheets...</p>
-              </div>
-            ) : availableSheets.length > 0 ? (
-              <>
-                <p className="text-xs font-medium text-[#d4dff0] mb-3">
-                  Found {availableSheets.length} sheet{availableSheets.length !== 1 ? 's' : ''} — select one to connect:
-                </p>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {availableSheets.map((sheet) => (
-                    <button
-                      key={sheet.gid}
-                      onClick={() => handleSelectSheet(sheet)}
-                      disabled={isLoading}
-                      className="w-full text-left p-3 rounded-lg bg-[#1a2642] border border-[#2a3d5f] hover:border-[#4a6d8f] hover:bg-[#1f2d4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-[#a5d8ff]">{sheet.name}</p>
-                          <p className="text-xs text-[#8ca6d3] mt-1">
-                            {sheet.rowCount} rows × {sheet.columnCount} columns
-                          </p>
-                          <p className="text-xs text-[#6a8aad] mt-1 truncate">
-                            Columns: {sheet.preview}
-                          </p>
-                        </div>
-                        {isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-rc-accent" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-[#6a8aad]" />
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="text-xs text-[#8ca6d3]">No sheets found. Make sure your spreadsheet is shared publicly.</p>
-            )}
-          </div>
-        )}
 
         <div>
           <label className="block text-xs font-medium text-rc-textMuted mb-1.5">
-            Sheet Name{" "}
-            <span className="text-rc-textDim">(optional - or use Scan Sheets above)</span>
+            Sheet Name or GID{" "}
+            <span className="text-rc-textDim">(paste the gid number like 1674803177)</span>
           </label>
-          <input
-            type="text"
-            value={sheetName}
-            onChange={(e) => setSheetName(e.target.value)}
-            placeholder="e.g., RevenueCat.APP DATA"
-            className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={sheetName}
+              onChange={(e) => setSheetName(e.target.value)}
+              placeholder="e.g., 1674803177 or RevenueCat.APP DATA"
+              className="flex-1 px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
+            />
+            <button
+              onClick={handleConnectByGid}
+              disabled={!sheetUrl.trim() || !sheetName.trim() || isLoading}
+              className="px-4 py-2.5 bg-rc-accent text-white text-sm font-medium rounded-lg hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Connect"
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
