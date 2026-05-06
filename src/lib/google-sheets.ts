@@ -4,43 +4,103 @@ import type { RawRow } from "@/types";
 /**
  * Fetches data from a Google Sheet using the published CSV export URL.
  * The sheet must be shared as "Anyone with the link can view".
+ * If sheetName is not found, automatically tries other sheets.
  */
 export async function fetchSheetData(
   sheetId: string,
   sheetName?: string
 ): Promise<RawRow[]> {
-  // Build the CSV export URL
-  let url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv`;
-  
+  // First, try with the specified sheet name (if provided)
   if (sheetName) {
-    // For sheet names with special characters, we need to encode properly
-    url += `&sheet=${encodeURIComponent(sheetName)}`;
+    try {
+      const data = await fetchSheetByName(sheetId, sheetName);
+      if (data.length > 0) {
+        const columns = Object.keys(data[0] || {});
+        console.log("Successfully fetched from named sheet:", { sheetName, columns });
+        return data;
+      }
+    } catch (e) {
+      console.warn("Failed to fetch from named sheet, trying other sheets...", e);
+    }
   }
 
-  console.log("Fetching sheet data from:", { url, sheetId, sheetName });
+  // If no sheet name or it failed, try to auto-detect by fetching different sheets
+  // Try sheets with gid 0, 1, 2, etc. (common sheet indices)
+  for (let gid = 0; gid <= 5; gid++) {
+    try {
+      const data = await fetchSheetByGid(sheetId, gid);
+      if (data.length > 0) {
+        const columns = Object.keys(data[0] || {});
+        
+        // Check if this looks like a metrics sheet (has more than just "Users" or "Id")
+        const hasMetrics = columns.length > 1 || 
+          (columns.length === 1 && !columns[0].toLowerCase().includes('users') && !columns[0].toLowerCase().includes('id'));
+        
+        if (hasMetrics || columns.some(c => 
+          /revenue|arr|mrr|subscription|customer|trial|ltv|refund|churn/i.test(c)
+        )) {
+          console.log("Auto-detected metrics sheet:", { gid, columns });
+          return data;
+        }
+      }
+    } catch (e) {
+      // Continue to next sheet
+      continue;
+    }
+  }
 
+  // Fallback to first sheet
+  try {
+    const data = await fetchSheetByGid(sheetId, 0);
+    const columns = Object.keys(data[0] || {});
+    console.log("Fallback: using first sheet with columns:", columns);
+    return data;
+  } catch (error) {
+    throw new Error("Unable to fetch any sheet from the spreadsheet");
+  }
+}
+
+async function fetchSheetByName(sheetId: string, sheetName: string): Promise<RawRow[]> {
+  const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`;
+  
+  console.log("Fetching sheet by name:", { url });
+  
   const response = await fetch(url, {
-    next: { revalidate: 60 }, // Cache for 60 seconds
+    next: { revalidate: 60 },
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch sheet data: ${response.status} ${response.statusText}. Make sure the sheet is shared publicly.`
-    );
+    throw new Error(`Failed to fetch sheet: ${response.status}`);
   }
 
   const csvText = await response.text();
-  
-  // Log the first 500 chars of CSV to debug
-  console.log("CSV data received (first 500 chars):", csvText.substring(0, 500));
-  console.log("CSV has", csvText.split('\n').length, "rows");
+  return parseCSV(csvText);
+}
 
+async function fetchSheetByGid(sheetId: string, gid: number): Promise<RawRow[]> {
+  const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
+  
+  console.log("Fetching sheet by gid:", { gid, url });
+  
+  const response = await fetch(url, {
+    next: { revalidate: 60 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sheet with gid ${gid}: ${response.status}`);
+  }
+
+  const csvText = await response.text();
+  return parseCSV(csvText);
+}
+
+function parseCSV(csvText: string): Promise<RawRow[]> {
   return new Promise((resolve, reject) => {
     Papa.parse<RawRow>(csvText, {
       header: true,
       skipEmptyLines: true,
       dynamicTyping: false,
-      transformHeader: (h) => h.trim(), // Trim header names
+      transformHeader: (h) => h.trim(),
       complete: (results) => {
         if (results.errors.length > 0) {
           console.warn("CSV parse warnings:", results.errors);
@@ -49,7 +109,6 @@ export async function fetchSheetData(
         console.log("Parsed CSV:", {
           rowCount: results.data.length,
           columns: results.data.length > 0 ? Object.keys(results.data[0]) : [],
-          firstRow: results.data[0],
         });
         
         resolve(results.data);
