@@ -81,9 +81,15 @@ export async function GET(request: NextRequest) {
     const allColumns = Object.keys(data[0] || {});
     const isPreAggregated = isPreAggregatedMetricsSheet(allColumns);
 
+    console.log("Chart API Debug:", {
+      columns: allColumns,
+      isPreAggregated,
+      preAggMetrics: isPreAggregated ? getPreAggregatedMetrics(allColumns) : [],
+    });
+
     if (!isPreAggregated) {
       return NextResponse.json(
-        { error: "This sheet does not appear to contain pre-aggregated metrics" },
+        { error: `This sheet does not appear to contain pre-aggregated metrics. Columns found: ${allColumns.join(", ")}` },
         { status: 400 }
       );
     }

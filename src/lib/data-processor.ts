@@ -237,11 +237,18 @@ function safeDateLabel(dateKey: string, groupBy: string): string {
 // ─── Pre-Aggregated Metrics Detection ───────────────────────────────────────
 
 const PRE_AGGREGATED_METRIC_PATTERNS = [
-  "ARR", "MRR", "Revenue", "Cumulative", 
-  "Subscriptions", "Customers", "Churn",
-  "Trials", "LTV", "Purchases",
-  "Conversion", "Retention", "Refund",
-  "Active", "New", "Movement", "Status", "Rate", "Survey"
+  // Revenue metrics
+  "arr", "mrr", "revenue", "cumulative", "non-subscription", "purchase",
+  // Subscription metrics
+  "subscription", "active", "new", "paid", "retention", "movement",
+  // Customer metrics
+  "customer", "ltv", "realized", "cohort",
+  // Risk metrics
+  "churn", "refund", "cancel",
+  // Trial & funnel metrics
+  "trial", "conversion", "initial", "rate",
+  // Other
+  "status", "survey", "response"
 ];
 
 export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
@@ -269,10 +276,12 @@ export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
 export function getPreAggregatedMetrics(columns: string[]): string[] {
   return columns.filter(col => {
     const lower = col.toLowerCase();
+    // Must be a metric pattern
     const isMetric = PRE_AGGREGATED_METRIC_PATTERNS.some(p => lower.includes(p.toLowerCase()));
+    // Must NOT be a date column
     const isNotDate = !lower.includes("date") && !lower.includes("period");
-    const isNotIdentifier = !lower.includes("id") && !lower.includes("customer") || lower.includes("new");
-    return isMetric && isNotDate && isNotIdentifier;
+    // Valid if it's a metric and not a date
+    return isMetric && isNotDate;
   });
 }
 
