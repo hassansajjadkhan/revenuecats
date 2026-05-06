@@ -93,32 +93,30 @@ function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) 
 }
 
 function buildOverviewMetrics(processedData: ProcessedData) {
-  // For pre-aggregated data, extract directly from time series charts
-  const getMetricFromChart = (keywords: string[]): number => {
-    for (const chart of processedData.timeSeriesCharts) {
-      const chartTitle = chart.title.toLowerCase();
-      const matches = keywords.some(k => chartTitle.includes(k));
-      
-      if (matches && chart.data.length > 0) {
-        const lastPoint = chart.data[chart.data.length - 1];
-        const seriesKey = chart.series[0]?.key;
-        if (seriesKey) {
-          const value = lastPoint[seriesKey];
-          if (typeof value === 'number') {
-            return value;
-          }
-        }
-      }
+  // Extract values from the last data point of each chart
+  const getLatestMetricValue = (chartTitle: string): number => {
+    const chart = processedData.timeSeriesCharts.find(
+      c => c.title.toLowerCase() === chartTitle.toLowerCase()
+    );
+    
+    if (!chart || chart.data.length === 0) return 0;
+    
+    const lastPoint = chart.data[chart.data.length - 1];
+    const seriesKey = chart.series[0]?.key;
+    
+    if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
+      return lastPoint[seriesKey] as number;
     }
     return 0;
   };
 
-  const activeTrials = getMetricFromChart(["trial", "active trial"]);
-  const activeSubscriptions = getMetricFromChart(["subscription", "active subscription"]);
-  const mrr = getMetricFromChart(["mrr", "monthly recurring"]);
-  const revenue = getMetricFromChart(["revenue", "cumulative"]);
-  const newCustomers = getMetricFromChart(["new customer", "new paid"]);
-  const activeCustomers = getMetricFromChart(["active customer", "customer"]);
+  // Map to the exact columns from your sheet
+  const activeTrials = getLatestMetricValue("Trial Conversion") || 0;
+  const activeSubscriptions = getLatestMetricValue("Active Subscriptions") || 0;
+  const mrr = getLatestMetricValue("MRR") || 0;
+  const revenue = getLatestMetricValue("Revenue") || 0;
+  const newCustomers = getLatestMetricValue("New Customers") || 0;
+  const arr = getLatestMetricValue("ARR") || 0;
 
   const cards: DashboardMetric[] = [
     { label: "Active Trials", value: formatNumber(activeTrials), change: 2.8, changeLabel: "In total" },
@@ -126,7 +124,7 @@ function buildOverviewMetrics(processedData: ProcessedData) {
     { label: "MRR", value: formatCurrency(mrr), change: 3.6, changeLabel: "Monthly Recurring Revenue" },
     { label: "Revenue", value: formatCurrency(revenue), change: 2.1, changeLabel: "Last 28 days" },
     { label: "New Customers", value: formatNumber(newCustomers), change: 5.2, changeLabel: "Last 28 days" },
-    { label: "Active Customers", value: formatNumber(activeCustomers), change: 0, changeLabel: "Last 28 days" },
+    { label: "ARR", value: formatCurrency(arr), change: 0, changeLabel: "Last 28 days" },
   ];
 
   return cards.slice(0, OVERVIEW_CARD_COUNT);
