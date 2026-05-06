@@ -238,17 +238,17 @@ function safeDateLabel(dateKey: string, groupBy: string): string {
 
 const PRE_AGGREGATED_METRIC_PATTERNS = [
   // Revenue metrics
-  "arr", "mrr", "revenue", "cumulative", "non-subscription", "purchase",
-  // Subscription metrics
-  "subscription", "active", "new", "paid", "retention", "movement",
+  "arr", "mrr", "revenue", "cumulative", "non-subscription", "purchase", "income",
+  // Subscription & user metrics
+  "subscription", "active", "new", "paid", "retention", "movement", "users", "count",
   // Customer metrics
-  "customer", "ltv", "realized", "cohort",
+  "customer", "ltv", "realized", "cohort", "lifetime",
   // Risk metrics
-  "churn", "refund", "cancel",
+  "churn", "refund", "cancel", "monthly",
   // Trial & funnel metrics
-  "trial", "conversion", "initial", "rate",
-  // Other
-  "status", "survey", "response"
+  "trial", "conversion", "initial", "rate", "recovery",
+  // Other metrics
+  "status", "survey", "response", "value", "average", "total", "sum", "percent", "growth"
 ];
 
 export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
@@ -258,30 +258,38 @@ export function isPreAggregatedMetricsSheet(columns: string[]): boolean {
   const hasDate = lowerColumns.some(c => c.includes("date") || c.includes("period"));
   if (!hasDate) return false;
   
-  // Check for numeric columns (indicators of aggregated data)
+  // Count numeric-looking columns (anything that's not an obvious ID/key column)
   const numericCount = columns.filter(col => {
     const lower = col.toLowerCase();
-    // Exclude date columns and obvious text columns
-    if (lower.includes("date") || lower.includes("period") || lower.includes("name") || lower.includes("id")) {
+    // Exclude obvious ID/key columns
+    if (lower.includes("id") || lower.includes("key") || lower.includes("email")) {
       return false;
     }
-    // Should be a metric-like column
-    return PRE_AGGREGATED_METRIC_PATTERNS.some(p => lower.includes(p.toLowerCase()));
+    // Exclude the date column itself
+    if (lower.includes("date") || lower.includes("period")) {
+      return false;
+    }
+    // Everything else is a potential metric column
+    return true;
   }).length;
   
-  // If we have date + at least 3 metric columns, it's pre-aggregated
-  return hasDate && numericCount >= 3;
+  // If we have date + at least 1 other column, it's likely pre-aggregated
+  return hasDate && numericCount >= 1;
 }
 
 export function getPreAggregatedMetrics(columns: string[]): string[] {
   return columns.filter(col => {
     const lower = col.toLowerCase();
-    // Must be a metric pattern
-    const isMetric = PRE_AGGREGATED_METRIC_PATTERNS.some(p => lower.includes(p.toLowerCase()));
-    // Must NOT be a date column
-    const isNotDate = !lower.includes("date") && !lower.includes("period");
-    // Valid if it's a metric and not a date
-    return isMetric && isNotDate;
+    // Exclude date columns
+    if (lower.includes("date") || lower.includes("period")) {
+      return false;
+    }
+    // Exclude obvious ID/key columns
+    if (lower.includes("id") || lower.includes("key") || lower.includes("email")) {
+      return false;
+    }
+    // Everything else is a metric
+    return true;
   });
 }
 
