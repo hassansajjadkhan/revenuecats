@@ -211,12 +211,29 @@ async function fallbackSequentialScan(
  * Fetches data from a Google Sheet using the published CSV export URL.
  * The sheet must be shared as "Anyone with the link can view".
  * If sheetName is not found, automatically tries other sheets.
+ * If sheetName is all digits, treats it as a gid directly.
  */
 export async function fetchSheetData(
   sheetId: string,
   sheetName?: string
 ): Promise<RawRow[]> {
-  // First, try with the specified sheet name (if provided)
+  // Check if sheetName is actually a gid (all digits)
+  if (sheetName && /^\d+$/.test(sheetName.trim())) {
+    console.log("Detected numeric gid input:", sheetName);
+    try {
+      const data = await fetchSheetByGid(sheetId, parseInt(sheetName.trim(), 10));
+      if (data.length > 0) {
+        const columns = Object.keys(data[0] || {});
+        console.log("Successfully fetched from gid:", { gid: sheetName, columns });
+        return data;
+      }
+    } catch (e) {
+      console.error("Failed to fetch from gid:", e);
+      throw e;
+    }
+  }
+
+  // Try with the specified sheet name (if provided)
   if (sheetName) {
     try {
       const data = await fetchSheetByName(sheetId, sheetName);
