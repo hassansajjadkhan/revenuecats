@@ -9,8 +9,11 @@ import {
   ExternalLink,
   HelpCircle,
   Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { extractSheetId } from "@/lib/utils";
+import { fetchAvailableSheets } from "@/lib/google-sheets";
+import type { AvailableSheet } from "@/lib/google-sheets";
 
 interface SheetConnectorProps {
   onConnect: (sheetId: string, sheetName?: string) => void;
@@ -28,17 +31,38 @@ export default function SheetConnector({
   const [sheetUrl, setSheetUrl] = useState("");
   const [sheetName, setSheetName] = useState("");
   const [showHelp, setShowHelp] = useState(false);
-
-  const handleConnect = () => {
-    const id = extractSheetId(sheetUrl);
-    if (id) {
-      onConnect(id, sheetName || undefined);
-    }
-  };
+  const [availableSheets, setAvailableSheets] = useState<AvailableSheet[]>([]);
+  const [isScanningSheets, setIsScanningSheets] = useState(false);
+  const [showSheetPicker, setShowSheetPicker] = useState(false);
 
   const handleQuickConnect = () => {
     // User's personal RevenueCat sheet - RevenueCat.APP DATA tab
     onConnect("19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA", "RevenueCat.APP DATA");
+  };
+
+  const handleScanSheets = async () => {
+    const id = extractSheetId(sheetUrl);
+    if (!id) return;
+    
+    setIsScanningSheets(true);
+    setShowSheetPicker(true);
+    
+    try {
+      const sheets = await fetchAvailableSheets(id);
+      setAvailableSheets(sheets);
+    } catch (e) {
+      console.error("Error scanning sheets:", e);
+      setAvailableSheets([]);
+    } finally {
+      setIsScanningSheets(false);
+    }
+  };
+
+  const handleSelectSheet = (sheet: AvailableSheet) => {
+    const id = extractSheetId(sheetUrl);
+    if (id) {
+      onConnect(id, sheet.name);
+    }
   };
 
   return (
@@ -141,24 +165,60 @@ export default function SheetConnector({
               className="flex-1 px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
             />
             <button
-              onClick={handleConnect}
-              disabled={!sheetUrl.trim() || isLoading}
-              className="px-4 py-2.5 bg-rc-accent text-white text-sm font-medium rounded-lg hover:bg-rc-accentHover disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              onClick={handleScanSheets}
+              disabled={!sheetUrl.trim() || isScanningSheets || isLoading}
+              className="px-4 py-2.5 bg-[#2a5a7f] text-[#a5d8ff] text-sm font-medium rounded-lg hover:bg-[#3a6a8f] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
             >
-              {isLoading ? (
+              {isScanningSheets ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Link2 className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4" />
               )}
-              Connect
+              Scan Sheets
             </button>
           </div>
         </div>
 
+        {/* Available Sheets List */}
+        {showSheetPicker && availableSheets.length > 0 && (
+          <div className="p-4 rounded-lg bg-[#0a1219] border border-[#2a3d5f] space-y-2">
+            <p className="text-xs font-medium text-[#d4dff0] mb-3">
+              Found {availableSheets.length} sheet{availableSheets.length !== 1 ? 's' : ''} — select one to connect:
+            </p>
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
+              {availableSheets.map((sheet) => (
+                <button
+                  key={sheet.gid}
+                  onClick={() => handleSelectSheet(sheet)}
+                  disabled={isLoading}
+                  className="w-full text-left p-3 rounded-lg bg-[#1a2642] border border-[#2a3d5f] hover:border-[#4a6d8f] hover:bg-[#1f2d4a] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-[#a5d8ff]">{sheet.name}</p>
+                      <p className="text-xs text-[#8ca6d3] mt-1">
+                        {sheet.rowCount} rows × {sheet.columnCount} columns
+                      </p>
+                      <p className="text-xs text-[#6a8aad] mt-1 truncate">
+                        Columns: {sheet.preview}
+                      </p>
+                    </div>
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-rc-accent" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 text-[#6a8aad]" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="block text-xs font-medium text-rc-textMuted mb-1.5">
             Sheet Name{" "}
-            <span className="text-rc-textDim">(optional, defaults to first sheet)</span>
+            <span className="text-rc-textDim">(optional - or use Scan Sheets above)</span>
           </label>
           <input
             type="text"
@@ -167,9 +227,6 @@ export default function SheetConnector({
             placeholder="e.g., RevenueCat.APP DATA"
             className="w-full px-3 py-2.5 rounded-lg border border-rc-border bg-[#12161e] text-sm text-rc-text outline-none focus:border-rc-accent focus:ring-1 focus:ring-rc-accent transition-all"
           />
-          <p className="text-xs text-[#8ca6d3] mt-1.5">
-            To find the exact sheet name: Open your Google Sheet, click the tab at the bottom, and copy the exact name (e.g., "RevenueCat.APP DATA")
-          </p>
         </div>
       </div>
 

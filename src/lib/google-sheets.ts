@@ -1,6 +1,91 @@
 import Papa from "papaparse";
 import type { RawRow } from "@/types";
 
+export interface AvailableSheet {
+  gid: number;
+  name: string;
+  rowCount: number;
+  columnCount: number;
+  columns: string[];
+  preview: string;
+}
+
+/**
+ * Tries to find all available sheets in a Google Sheet by attempting different gid values
+ */
+export async function fetchAvailableSheets(
+  sheetId: string
+): Promise<AvailableSheet[]> {
+  const sheets: AvailableSheet[] = [];
+  
+  console.log("Scanning for available sheets in:", sheetId);
+  
+  // Try gid values from 0 to 20 (covers most cases)
+  for (let gid = 0; gid <= 20; gid++) {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${encodeURIComponent(sheetId)}/export?format=csv&gid=${gid}`;
+      
+      const response = await fetch(url, {
+        next: { revalidate: 60 },
+      });
+      
+      if (!response.ok) continue;
+      
+      const csvText = await response.text();
+      
+      // Parse to get column info
+      const data = await new Promise<RawRow[]>((resolve) => {
+        Papa.parse<RawRow>(csvText, {
+          header: true,
+          skipEmptyLines: true,
+          dynamicTyping: false,
+          transformHeader: (h) => h.trim(),
+          complete: (results) => {
+            resolve(results.data);
+          },
+          error: () => resolve([]),
+        });
+      });
+      
+      if (data.length > 0) {
+        const columns = Object.keys(data[0] || {});
+        
+        // Try to infer the sheet name from first column or data
+        let sheetName = `Sheet ${gid}`;
+        
+        // Check if columns look like they have a sheet identifier
+        if (columns.length > 0) {
+          // Look for common patterns in column names
+          if (columns.some(c => /date|revenue|arr|mrr|subscription/i.test(c))) {
+            sheetName = "RevenueCat.APP DATA";
+          } else if (columns.length === 1 && columns[0].toLowerCase() === 'users') {
+            sheetName = "Users";
+          } else if (columns[0]) {
+            sheetName = columns[0];
+          }
+        }
+        
+        sheets.push({
+          gid,
+          name: sheetName,
+          rowCount: data.length,
+          columnCount: columns.length,
+          columns,
+          preview: columns.join(", "),
+        });
+        
+        console.log("Found sheet:", { gid, name: sheetName, columns: columns.length, rows: data.length });
+      }
+    } catch (e) {
+      // Continue to next gid
+      continue;
+    }
+  }
+  
+  console.log("Available sheets found:", sheets);
+  return sheets;
+}
+
 /**
  * Fetches data from a Google Sheet using the published CSV export URL.
  * The sheet must be shared as "Anyone with the link can view".
