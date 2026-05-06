@@ -81,20 +81,30 @@ export async function GET(request: NextRequest) {
     const allColumns = Object.keys(data[0] || {});
     const isPreAggregated = isPreAggregatedMetricsSheet(allColumns);
 
+    const preAggMetrics = getPreAggregatedMetrics(allColumns);
+    
     console.log("Chart API Debug:", {
+      sheetId,
       columns: allColumns,
+      numRows: data.length,
       isPreAggregated,
-      preAggMetrics: isPreAggregated ? getPreAggregatedMetrics(allColumns) : [],
+      preAggMetrics,
+      requestedChart: chartName,
     });
 
     if (!isPreAggregated) {
+      console.error("Not pre-aggregated:", {
+        columns: allColumns,
+        dateColumns: mapping.dateColumns,
+      });
       return NextResponse.json(
-        { error: `This sheet does not appear to contain pre-aggregated metrics. Columns found: ${allColumns.join(", ")}` },
+        { 
+          error: `This sheet does not appear to contain pre-aggregated metrics.\n\nColumns found: ${allColumns.join(", ")}\n\nDate columns: ${mapping.dateColumns.join(", ") || "None detected"}\n\nMake sure your sheet has a Date column and metric columns (like Revenue, MRR, ARR, etc.).`,
+          debug: { allColumns, isPreAggregated, preAggMetrics }
+        },
         { status: 400 }
       );
     }
-
-    const preAggMetrics = getPreAggregatedMetrics(allColumns);
 
     // Find matching metric
     const matchingMetric = preAggMetrics.find(
@@ -102,9 +112,14 @@ export async function GET(request: NextRequest) {
     );
 
     if (!matchingMetric) {
+      console.error("Metric not found:", {
+        requested: chartName,
+        available: preAggMetrics,
+      });
       return NextResponse.json(
         {
           error: `Chart "${chartName}" not found. Available metrics: ${preAggMetrics.join(", ")}`,
+          debug: { preAggMetrics, availableCharts: preAggMetrics }
         },
         { status: 404 }
       );
