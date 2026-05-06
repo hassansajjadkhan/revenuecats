@@ -37,8 +37,8 @@ export default function SheetConnector({
   };
 
   const handleQuickConnect = () => {
-    // User's personal RevenueCat sheet
-    onConnect("19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA");
+    // User's personal RevenueCat sheet - RevenueCat.APP DATA tab
+    onConnect("19Wiql_-e8FoJS2MfjeHL07dO1TGc2llmc2hmPlFA4xA", "RevenueCat.APP DATA");
   };
 
   return (
