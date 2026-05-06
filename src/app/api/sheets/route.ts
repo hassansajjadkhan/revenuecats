@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchSheetData, getSheetColumns } from "@/lib/google-sheets";
+import { detectColumns } from "@/lib/data-processor";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -24,11 +25,36 @@ export async function GET(request: NextRequest) {
   try {
     const data = await fetchSheetData(sheetId, sheetName);
     const columns = getSheetColumns(data);
+    
+    // Log raw columns and detection
+    console.log("Sheets API Debug:", {
+      sheetId,
+      sheetName,
+      rowCount: data.length,
+      rawColumns: columns,
+      firstRow: data[0],
+    });
+    
+    // Detect column types
+    const mapping = detectColumns(data);
+    console.log("Column detection results:", {
+      dateColumns: mapping.dateColumns,
+      numericColumns: mapping.numericColumns,
+      categoryColumns: mapping.categoryColumns,
+      textColumns: mapping.textColumns,
+      allDetected: mapping.detected.map(d => ({ name: d.name, type: d.type, confidence: d.confidence })),
+    });
 
     return NextResponse.json({
       data,
       columns,
       rowCount: data.length,
+      detection: {
+        dateColumns: mapping.dateColumns,
+        numericColumns: mapping.numericColumns,
+        categoryColumns: mapping.categoryColumns,
+        textColumns: mapping.textColumns,
+      }
     });
   } catch (error) {
     const message =
@@ -36,6 +62,7 @@ export async function GET(request: NextRequest) {
         ? error.message
         : "Failed to fetch sheet data";
 
+    console.error("Sheets API error:", { error: message, sheetId, sheetName });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
