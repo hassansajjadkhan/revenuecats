@@ -20,14 +20,14 @@ export async function fetchAvailableSheets(
   
   console.log("Scanning for available sheets in:", sheetId);
   
-  // Try gid values from 0 to 200 to catch all sheets
-  // Stop early if we find several consecutive empty sheets
-  let consecutiveEmpty = 0;
-  const maxConsecutiveEmpty = 10;
+  // Try gid values from 0 to 500 to catch all sheets
+  // Stop only after we've gone 20+ past the last found sheet
+  let lastFoundAt = -1;
   
-  for (let gid = 0; gid <= 200; gid++) {
-    if (consecutiveEmpty >= maxConsecutiveEmpty) {
-      console.log("Stopping scan - too many empty sheets in a row");
+  for (let gid = 0; gid <= 500; gid++) {
+    // Smart stopping: if we've checked 50 gids past the last found sheet, stop
+    if (lastFoundAt >= 0 && gid - lastFoundAt > 50) {
+      console.log(`Stopping scan at gid ${gid} - no sheets found in last 50 gids`);
       break;
     }
     
@@ -39,7 +39,6 @@ export async function fetchAvailableSheets(
       });
       
       if (!response.ok) {
-        consecutiveEmpty++;
         continue;
       }
       
@@ -47,12 +46,8 @@ export async function fetchAvailableSheets(
       
       // Check if response is actually empty or just whitespace
       if (!csvText || csvText.trim().length < 5) {
-        consecutiveEmpty++;
         continue;
       }
-      
-      // Reset counter when we find data
-      consecutiveEmpty = 0;
       
       // Parse to get column info
       const data = await new Promise<RawRow[]>((resolve) => {
@@ -69,16 +64,17 @@ export async function fetchAvailableSheets(
       });
       
       if (data.length === 0) {
-        consecutiveEmpty++;
         continue;
       }
       
       const columns = Object.keys(data[0] || {});
       
       if (columns.length === 0) {
-        consecutiveEmpty++;
         continue;
       }
+      
+      // Update last found position
+      lastFoundAt = gid;
       
       // Try to infer the sheet name from first column or data
       let sheetName = `Sheet ${gid}`;
@@ -104,7 +100,6 @@ export async function fetchAvailableSheets(
       
       console.log("Found sheet:", { gid, name: sheetName, columns: columns.length, rows: data.length });
     } catch (e) {
-      consecutiveEmpty++;
       console.log(`Error scanning gid ${gid}:`, e);
       continue;
     }
