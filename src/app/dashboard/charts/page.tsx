@@ -18,6 +18,10 @@ import {
   BarChart3,
   ArrowLeft,
   Loader2,
+  Download,
+  Share2,
+  Save,
+  Settings,
 } from "lucide-react";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { cn, formatCurrency, formatNumber } from "@/lib/utils";
@@ -80,8 +84,6 @@ interface ChartData {
 }
 
 function ChartsPageContent() {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     Revenue: true,
@@ -91,6 +93,13 @@ function ChartsPageContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sheetId, setSheetId] = useState<string | null>(null);
+  
+  // New state for controls
+  const [timePeriod, setTimePeriod] = useState("90days");
+  const [chartType, setChartType] = useState("stacked");
+  const [segment, setSegment] = useState("none");
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("dashboard_sheet_config");
@@ -99,7 +108,6 @@ function ChartsPageContent() {
         const config = JSON.parse(stored);
         if (config.sheetId) {
           setSheetId(config.sheetId);
-          // Also store the sheet name for chart API
           localStorage.setItem("connected_sheet_name", config.sheetName || "");
         }
       } catch (e) {
@@ -112,13 +120,14 @@ function ChartsPageContent() {
     setExpandedCategories((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
-  const handleChartSelect = async (chartName: string) => {
+  const handleChartSelect = async (chartName: string, category: string) => {
     if (!sheetId) {
       setError("No sheet connected. Please connect a sheet in the Overview tab.");
       return;
     }
 
     setSelectedChart(chartName);
+    setSelectedCategory(category);
     setLoading(true);
     setError(null);
 
@@ -172,19 +181,10 @@ function ChartsPageContent() {
         <main className="flex-1 min-w-0">
           <Header title="Charts" subtitle="Browse and view all revenue charts" onSearch={setSearchQuery} />
 
-          <div className="flex flex-1 min-h-screen">
-            {/* Charts Navigation Panel */}
-            <div className="w-64 border-r border-[#2e3340] bg-[#141821] flex flex-col">
+          <div className="flex flex-1 min-h-screen bg-[#0a0e14]">
+            {/* Left Sidebar - Charts Navigation */}
+            <div className="w-72 border-r border-[#2e3340] bg-[#0f1218] flex flex-col overflow-hidden">
               <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-                {/* Back Button */}
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-sm text-[#8892a4] hover:text-white mb-4 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Overview
-                </Link>
-
                 {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6f7788]" />
@@ -193,12 +193,12 @@ function ChartsPageContent() {
                     placeholder="Search charts..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0f1218] border border-[#2e3340] text-[13px] text-white placeholder-[#6f7788] outline-none focus:border-[#3a4150]"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#0a0e14] border border-[#2e3340] text-[13px] text-white placeholder-[#6f7788] outline-none focus:border-[#3a4150]"
                   />
                 </div>
 
                 {/* Chart Categories */}
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {filteredCharts.map((category) => {
                     const CategoryIcon = category.icon;
                     const isExpanded = expandedCategories[category.label];
@@ -207,7 +207,7 @@ function ChartsPageContent() {
                       <div key={category.label}>
                         <button
                           onClick={() => toggleCategory(category.label)}
-                          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-semibold text-white hover:bg-[#1a1f2e] transition-colors group"
+                          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-semibold text-white hover:bg-[#1a1f2e] transition-colors"
                         >
                           <span className="flex items-center gap-3">
                             <CategoryIcon className={cn("w-4 h-4 flex-shrink-0", category.colorClass)} />
@@ -226,12 +226,12 @@ function ChartsPageContent() {
                             {category.items.map((item) => (
                               <button
                                 key={item}
-                                onClick={() => handleChartSelect(item)}
+                                onClick={() => handleChartSelect(item, category.label)}
                                 className={cn(
                                   "w-full text-left px-3 py-2 rounded-lg text-[12px] transition-colors truncate",
                                   selectedChart === item
                                     ? "bg-[#1a1f2e] text-white font-medium"
-                                    : "text-[#8892a4] hover:text-white hover:bg-[#0f1218]"
+                                    : "text-[#8892a4] hover:text-white hover:bg-[#0a0e14]"
                                 )}
                               >
                                 {item}
@@ -246,10 +246,10 @@ function ChartsPageContent() {
               </div>
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 p-6 lg:p-8">
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col overflow-hidden">
               {!sheetId ? (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
                   <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-8 h-8 text-rc-textDim" />
                   </div>
@@ -265,7 +265,7 @@ function ChartsPageContent() {
                   </Link>
                 </div>
               ) : !selectedChart ? (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
                   <div className="w-16 h-16 rounded-2xl bg-rc-surface border border-rc-border flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-8 h-8 text-rc-textDim" />
                   </div>
@@ -275,12 +275,12 @@ function ChartsPageContent() {
                   </p>
                 </div>
               ) : loading ? (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
                   <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
                   <p className="text-sm text-rc-textMuted">Loading chart data...</p>
                 </div>
               ) : error ? (
-                <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex-1 flex flex-col items-center justify-center p-8">
                   <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
                     <BarChart3 className="w-8 h-8 text-red-500" />
                   </div>
@@ -288,130 +288,197 @@ function ChartsPageContent() {
                   <p className="text-sm text-red-400 max-w-md mx-auto text-center">{error}</p>
                 </div>
               ) : chartData ? (
-                <div className="space-y-6">
-                  {/* Chart Header */}
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white mb-2">{chartData.title}</h2>
-                    {chartData.metadata && (
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        {chartData.metadata.latest !== undefined && (
-                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
-                            <p className="text-[12px] text-[#8892a4] mb-1">Latest</p>
-                            <p className="text-lg font-semibold text-white">
-                              {formatTooltipValue(chartData.metadata.latest, chartData.title)}
-                            </p>
-                          </div>
-                        )}
-                        {chartData.metadata.average !== undefined && (
-                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
-                            <p className="text-[12px] text-[#8892a4] mb-1">Average</p>
-                            <p className="text-lg font-semibold text-white">
-                              {formatTooltipValue(chartData.metadata.average, chartData.title)}
-                            </p>
-                          </div>
-                        )}
-                        {chartData.metadata.change !== undefined && (
-                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
-                            <p className="text-[12px] text-[#8892a4] mb-1">Change</p>
-                            <p className={`text-lg font-semibold ${chartData.metadata.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {chartData.metadata.change >= 0 ? '+' : ''}{chartData.metadata.change.toFixed(1)}%
-                            </p>
-                          </div>
-                        )}
-                        {chartData.metadata.min !== undefined && (
-                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
-                            <p className="text-[12px] text-[#8892a4] mb-1">Min</p>
-                            <p className="text-lg font-semibold text-white">
-                              {formatTooltipValue(chartData.metadata.min, chartData.title)}
-                            </p>
-                          </div>
-                        )}
-                        {chartData.metadata.max !== undefined && (
-                          <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-3">
-                            <p className="text-[12px] text-[#8892a4] mb-1">Max</p>
-                            <p className="text-lg font-semibold text-white">
-                              {formatTooltipValue(chartData.metadata.max, chartData.title)}
-                            </p>
-                          </div>
-                        )}
+                <div className="flex-1 flex flex-col overflow-y-auto">
+                  {/* Breadcrumb & Header */}
+                  <div className="border-b border-[#2e3340] p-6 pb-4">
+                    <div className="flex items-center gap-2 text-sm text-[#8892a4] mb-4">
+                      <span>TruthSayer AI</span>
+                      <span>/</span>
+                      <span>Charts</span>
+                      <span>/</span>
+                      <span className="text-white">{selectedCategory}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-2xl font-semibold text-white">{chartData.title}</h1>
+                      <div className="flex items-center gap-2">
+                        <button className="px-3 py-1.5 text-[13px] font-medium text-white bg-[#1a1f2e] hover:bg-[#252d3a] rounded-lg transition-colors flex items-center gap-2">
+                          <Save className="w-4 h-4" />
+                          Save chart
+                        </button>
+                        <button className="px-3 py-1.5 text-[13px] font-medium text-white bg-[#1a1f2e] hover:bg-[#252d3a] rounded-lg transition-colors flex items-center gap-2">
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </button>
+                        <button className="px-3 py-1.5 text-[13px] font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2">
+                          <Download className="w-4 h-4" />
+                          Export
+                        </button>
                       </div>
-                    )}
+                    </div>
                   </div>
 
-                  {/* Chart */}
-                  <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-6">
-                    <ResponsiveContainer width="100%" height={400}>
-                      <AreaChart
-                        data={chartData.data}
-                        margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      >
-                        <defs>
-                          {chartData.series.map((series) => (
-                            <linearGradient
-                              key={series.key}
-                              id={`gradient-${series.key}`}
-                              x1="0"
-                              y1="0"
-                              x2="0"
-                              y2="1"
-                            >
-                              <stop
-                                offset="5%"
-                                stopColor={series.color}
-                                stopOpacity={0.3}
-                              />
-                              <stop
-                                offset="95%"
-                                stopColor={series.color}
-                                stopOpacity={0}
-                              />
-                            </linearGradient>
-                          ))}
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
-                        <XAxis
-                          dataKey="date"
-                          stroke="#6f7788"
-                          tick={{ fontSize: 12 }}
-                        />
-                        <YAxis
-                          stroke="#6f7788"
-                          tick={{ fontSize: 12 }}
-                          tickFormatter={(value) =>
-                            formatTooltipValue(value, chartData.title).split("$").pop() || ""
-                          }
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#141821",
-                            border: "1px solid #2e3340",
-                            borderRadius: "8px",
-                          }}
-                          labelStyle={{ color: "#white" }}
-                          formatter={(value) =>
-                            formatTooltipValue(value as number, chartData.title)
-                          }
-                        />
-                        {chartData.series.length > 0 && (
-                          <Legend
-                            wrapperStyle={{
-                              paddingTop: "20px",
-                            }}
-                          />
-                        )}
-                        {chartData.series.map((series) => (
-                          <Area
-                            key={series.key}
-                            type="monotone"
-                            dataKey={series.key}
-                            stroke={series.color}
-                            fill={`url(#gradient-${series.key})`}
-                            name={series.label}
-                            isAnimationActive={false}
-                          />
+                  {/* Control Bar */}
+                  <div className="border-b border-[#2e3340] p-4 px-6 flex items-center gap-3 flex-wrap bg-[#0f1218]">
+                    <button className="px-3 py-1.5 text-[13px] font-medium text-white bg-[#1a1f2e] hover:bg-[#252d3a] rounded-lg transition-colors flex items-center gap-2">
+                      <Filter className="w-4 h-4" />
+                      Filter
+                    </button>
+                    
+                    <div className="flex items-center gap-2">
+                      <label className="text-[12px] text-[#8892a4]">Segment:</label>
+                      <select value={segment} onChange={(e) => setSegment(e.target.value)} className="px-2 py-1 text-[12px] bg-[#1a1f2e] border border-[#2e3340] text-white rounded hover:border-[#3a4150]">
+                        <option value="none">None</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <label className="text-[12px] text-[#8892a4]">{chartData.title}:</label>
+                      <select className="px-2 py-1 text-[12px] bg-[#1a1f2e] border border-[#2e3340] text-white rounded hover:border-[#3a4150]">
+                        {chartData.series.map((s) => (
+                          <option key={s.key} value={s.key}>{s.label}</option>
                         ))}
-                      </AreaChart>
-                    </ResponsiveContainer>
+                      </select>
+                    </div>
+
+                    <div className="ml-auto flex items-center gap-3">
+                      <select value={timePeriod} onChange={(e) => setTimePeriod(e.target.value)} className="px-3 py-1.5 text-[12px] bg-[#1a1f2e] border border-[#2e3340] text-white rounded hover:border-[#3a4150]">
+                        <option value="7days">Last 7 days</option>
+                        <option value="30days">Last 30 days</option>
+                        <option value="90days">Last 90 days</option>
+                        <option value="all">All time</option>
+                      </select>
+                      
+                      <select value={chartType} onChange={(e) => setChartType(e.target.value)} className="px-3 py-1.5 text-[12px] bg-[#1a1f2e] border border-[#2e3340] text-white rounded hover:border-[#3a4150]">
+                        <option value="stacked">Stacked area</option>
+                        <option value="line">Line</option>
+                        <option value="bar">Bar</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Chart Area */}
+                  <div className="flex-1 p-6 px-6 overflow-auto">
+                    <div className="bg-[#0f1218] border border-[#2e3340] rounded-lg p-6 h-96">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={chartData.data}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                        >
+                          <defs>
+                            {chartData.series.map((series) => (
+                              <linearGradient
+                                key={series.key}
+                                id={`gradient-${series.key}`}
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="1"
+                              >
+                                <stop
+                                  offset="5%"
+                                  stopColor={series.color}
+                                  stopOpacity={0.3}
+                                />
+                                <stop
+                                  offset="95%"
+                                  stopColor={series.color}
+                                  stopOpacity={0}
+                                />
+                              </linearGradient>
+                            ))}
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#2e3340" />
+                          <XAxis
+                            dataKey="date"
+                            stroke="#6f7788"
+                            tick={{ fontSize: 12 }}
+                          />
+                          <YAxis
+                            stroke="#6f7788"
+                            tick={{ fontSize: 12 }}
+                            tickFormatter={(value) =>
+                              isCurrencyMetric(chartData.title) ? `$${(value / 1000).toFixed(0)}k` : formatNumber(value)
+                            }
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#141821",
+                              border: "1px solid #2e3340",
+                              borderRadius: "8px",
+                            }}
+                            labelStyle={{ color: "white" }}
+                            formatter={(value) =>
+                              formatTooltipValue(value as number, chartData.title)
+                            }
+                          />
+                          {chartData.series.length > 0 && (
+                            <Legend
+                              wrapperStyle={{
+                                paddingTop: "20px",
+                              }}
+                            />
+                          )}
+                          {chartData.series.map((series) => (
+                            <Area
+                              key={series.key}
+                              type="monotone"
+                              dataKey={series.key}
+                              stroke={series.color}
+                              fill={`url(#gradient-${series.key})`}
+                              name={series.label}
+                              isAnimationActive={false}
+                            />
+                          ))}
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Data Table */}
+                  <div className="border-t border-[#2e3340] p-6 px-6 bg-[#0f1218]">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-semibold text-white">Data</h3>
+                      <div className="flex items-center gap-2">
+                        <label className="text-[12px] text-[#8892a4]">Row Average:</label>
+                        <select className="px-2 py-1 text-[11px] bg-[#0a0e14] border border-[#2e3340] text-white rounded hover:border-[#3a4150]">
+                          <option>Daily</option>
+                          <option>Weekly</option>
+                          <option>Monthly</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-[12px]">
+                        <thead>
+                          <tr className="border-b border-[#2e3340]">
+                            <th className="text-left py-3 px-3 font-semibold text-[#8892a4]">Date</th>
+                            {chartData.series.map((series) => (
+                              <th key={series.key} className="text-right py-3 px-3 font-semibold text-[#8892a4]">
+                                {series.label}
+                              </th>
+                            ))}
+                            <th className="text-right py-3 px-3 font-semibold text-[#8892a4]">Transactions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {chartData.data.slice(-10).reverse().map((row, idx) => (
+                            <tr key={idx} className="border-b border-[#1a1f2e] hover:bg-[#141821] transition-colors">
+                              <td className="py-3 px-3 text-white font-medium">{row.date}</td>
+                              {chartData.series.map((series) => (
+                                <td key={series.key} className="text-right py-3 px-3 text-[#8892a4]">
+                                  {row[series.key] !== undefined ? formatTooltipValue(row[series.key] as number, chartData.title) : "-"}
+                                </td>
+                              ))}
+                              <td className="text-right py-3 px-3 text-[#8892a4]">-</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               ) : null}
