@@ -93,8 +93,19 @@ function ChartsPageContent() {
   const [sheetId, setSheetId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("connected_sheet_id");
-    if (stored) setSheetId(stored);
+    const stored = localStorage.getItem("dashboard_sheet_config");
+    if (stored) {
+      try {
+        const config = JSON.parse(stored);
+        if (config.sheetId) {
+          setSheetId(config.sheetId);
+          // Also store the sheet name for chart API
+          localStorage.setItem("connected_sheet_name", config.sheetName || "");
+        }
+      } catch (e) {
+        console.error("Error parsing sheet config:", e);
+      }
+    }
   }, []);
 
   const toggleCategory = (label: string) => {
@@ -112,7 +123,16 @@ function ChartsPageContent() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/chart?chart=${encodeURIComponent(chartName)}&sheetId=${encodeURIComponent(sheetId)}`);
+      const sheetName = localStorage.getItem("connected_sheet_name") || "";
+      const params = new URLSearchParams({
+        chart: chartName,
+        sheetId: sheetId,
+      });
+      if (sheetName) {
+        params.set("sheetName", sheetName);
+      }
+
+      const response = await fetch(`/api/chart?${params}`);
 
       if (!response.ok) {
         const err = await response.json();
