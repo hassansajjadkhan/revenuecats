@@ -98,6 +98,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   const [expandedCharts, setExpandedCharts] = useState<Record<string, boolean>>({});
+  const [chartsExpanded, setChartsExpanded] = useState(false);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -151,19 +152,58 @@ export default function Sidebar() {
 
           {isDropdownOpen && (
             <div className="ml-2 mt-1 space-y-1">
-              {/* Charts Link */}
-              <Link
-                href="/dashboard/charts"
+              {/* Charts Toggle Button */}
+              <button
+                onClick={() => setChartsExpanded(!chartsExpanded)}
                 className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded text-[12px] font-medium text-[#b8c0cf] hover:text-white hover:bg-[#141821] transition-colors"
               >
                 <span className="flex items-center gap-2">
                   <BarChart3 className="w-3.5 h-3.5 flex-shrink-0 text-[#66d9e8]" />
                   <span>Charts</span>
                 </span>
-                <ChevronRight className="w-3 h-3 text-[#6f7788]" />
-              </Link>
+                <ChevronRight className={cn("w-3 h-3 text-[#6f7788] transition-transform", chartsExpanded && "rotate-90")} />
+              </button>
 
-              {/* Benchmarks Link */}
+              {/* Chart Categories */}
+              {chartsExpanded && (
+                <div className="ml-2 mt-1 space-y-1">
+                  {chartsMenu.map((category) => {
+                    const CategoryIcon = category.icon;
+                    const isCategoryOpen = expandedCharts[category.label];
+
+                    return (
+                      <div key={category.label}>
+                        <button
+                          onClick={() => toggleChartCategory(category.label)}
+                          className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded text-[12px] font-medium text-[#b8c0cf] hover:text-white hover:bg-[#141821] transition-colors"
+                        >
+                          <span className="flex items-center gap-2">
+                            <CategoryIcon className={cn("w-3.5 h-3.5 flex-shrink-0", category.colorClass)} />
+                            <span>{category.label}</span>
+                          </span>
+                          <ChevronRight className={cn("w-3 h-3 text-[#6f7788] transition-transform", isCategoryOpen && "rotate-90")} />
+                        </button>
+
+                        {isCategoryOpen && (
+                          <div className="ml-2 mt-0.5 space-y-1 border-l border-[#2e3340] pl-2">
+                            {category.items.map((chartItem) => (
+                              <Link
+                                key={chartItem}
+                                href="/dashboard/charts"
+                                className="block px-3 py-1 rounded text-[11px] text-[#8892a4] hover:text-white hover:bg-[#141821] transition-colors"
+                              >
+                                {chartItem}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Benchmarks Button */}
               <button
                 className="w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded text-[12px] font-medium text-[#b8c0cf] hover:text-white hover:bg-[#141821] transition-colors opacity-60 cursor-not-allowed"
               >
