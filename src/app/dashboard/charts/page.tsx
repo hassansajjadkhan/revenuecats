@@ -32,36 +32,42 @@ const chartsMenu = [
     label: "Revenue",
     icon: CircleDollarSign,
     colorClass: "text-[#66d9e8]",
+    squareColor: "#22c55e", // Green
     items: ["Cumulative Revenue", "ARR", "MRR", "Non-Subscription Purchases"],
   },
   {
     label: "Subscriptions",
     icon: Repeat,
     colorClass: "text-[#a5d8ff]",
+    squareColor: "#a855f7", // Purple
     items: ["Active Subscriptions", "Active Subscriptions Movement", "New Paid Subscriptions", "Subscription Retention", "Subscription Status"],
   },
   {
     label: "Cohorts and LTV",
     icon: Users2,
     colorClass: "text-[#b2f2bb]",
+    squareColor: "#b2f2bb", // Light Green
     items: ["Cohort Explorer", "Realized LTV per Customer", "Realized LTV per Paying Customer"],
   },
   {
     label: "Conversion funnel",
     icon: Filter,
     colorClass: "text-[#ffd8a8]",
+    squareColor: "#eab308", // Yellow
     items: ["New Customers", "Initial Conversion", "Trial Conversion", "Conversion to Paying"],
   },
   {
     label: "Trials",
     icon: Timer,
     colorClass: "text-[#eebefa]",
+    squareColor: "#ec4899", // Pink
     items: ["Active Trials", "Active Trials Movement", "New Trials"],
   },
   {
     label: "Churn and refunds",
     icon: Undo2,
     colorClass: "text-[#ffc9c9]",
+    squareColor: "#ef4444", // Red
     items: ["Churn", "Refund Rate", "App Store Refund Requests", "Play Store Cancel Reasons", "Customer Center Survey Responses"],
   },
 ];
@@ -228,13 +234,17 @@ function ChartsPageContent() {
                                 key={item}
                                 onClick={() => handleChartSelect(item, category.label)}
                                 className={cn(
-                                  "w-full text-left px-3 py-2 rounded-lg text-[12px] transition-colors truncate",
+                                  "w-full text-left px-3 py-2 rounded-lg text-[12px] transition-colors truncate flex items-center gap-2",
                                   selectedChart === item
                                     ? "bg-[#1a1f2e] text-white font-medium"
                                     : "text-[#8892a4] hover:text-white hover:bg-[#0a0e14]"
                                 )}
                               >
-                                {item}
+                                <div 
+                                  className="w-2.5 h-2.5 rounded flex-shrink-0"
+                                  style={{ backgroundColor: category.squareColor }}
+                                />
+                                <span className="truncate">{item}</span>
                               </button>
                             ))}
                           </div>
