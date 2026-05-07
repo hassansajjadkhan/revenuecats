@@ -93,26 +93,6 @@ function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) 
 }
 
 function buildOverviewMetrics(processedData: ProcessedData) {
-  // Debug: log all available charts in detail
-  console.log("=== CHART DEBUG START ===");
-  console.log("Total charts:", processedData.timeSeriesCharts.length);
-  
-  for (let i = 0; i < processedData.timeSeriesCharts.length; i++) {
-    const chart = processedData.timeSeriesCharts[i];
-    console.log(`\nChart ${i}: "${chart.title}"`);
-    console.log("  Series:", chart.series.map(s => ({ key: s.key, label: s.label })));
-    console.log("  Data length:", chart.data.length);
-    if (chart.data.length > 0) {
-      const lastPoint = chart.data[chart.data.length - 1];
-      console.log("  Last point:", lastPoint);
-      console.log("  Series[0] key:", chart.series[0]?.key);
-      if (chart.series[0]?.key) {
-        console.log("  Value at last point:", lastPoint[chart.series[0].key]);
-      }
-    }
-  }
-  console.log("=== CHART DEBUG END ===\n");
-
   // Fuzzy match a metric name to find the best chart
   const findBestMetricMatch = (searchTerms: string[]): number => {
     const searchLower = searchTerms.map(s => s.toLowerCase());
@@ -121,12 +101,17 @@ function buildOverviewMetrics(processedData: ProcessedData) {
     for (const chart of processedData.timeSeriesCharts) {
       const chartTitleLower = chart.title.toLowerCase();
       if (searchLower.some(term => chartTitleLower === term)) {
-        const lastPoint = chart.data[chart.data.length - 1];
-        const seriesKey = chart.series[0]?.key;
-        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
-          const value = lastPoint[seriesKey] as number;
-          console.log(`✓ Exact match for ${searchTerms}: ${value}`);
-          return value;
+        // Find first non-zero value from the end
+        for (let i = chart.data.length - 1; i >= 0; i--) {
+          const point = chart.data[i];
+          const seriesKey = chart.series[0]?.key;
+          if (seriesKey && point && typeof point[seriesKey] === 'number') {
+            const value = point[seriesKey] as number;
+            if (value !== 0) {
+              console.log(`✓ Exact match for ${searchTerms}: ${value} (from row ${i})`);
+              return value;
+            }
+          }
         }
       }
     }
@@ -135,12 +120,17 @@ function buildOverviewMetrics(processedData: ProcessedData) {
     for (const chart of processedData.timeSeriesCharts) {
       const chartTitleLower = chart.title.toLowerCase();
       if (searchLower.some(term => chartTitleLower.includes(term))) {
-        const lastPoint = chart.data[chart.data.length - 1];
-        const seriesKey = chart.series[0]?.key;
-        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
-          const value = lastPoint[seriesKey] as number;
-          console.log(`✓ Partial match for ${searchTerms} in "${chart.title}": ${value} (series key: ${seriesKey}, lastPoint value: ${lastPoint[seriesKey]})`);
-          return value;
+        // Find first non-zero value from the end
+        for (let i = chart.data.length - 1; i >= 0; i--) {
+          const point = chart.data[i];
+          const seriesKey = chart.series[0]?.key;
+          if (seriesKey && point && typeof point[seriesKey] === 'number') {
+            const value = point[seriesKey] as number;
+            if (value !== 0) {
+              console.log(`✓ Partial match for ${searchTerms} in "${chart.title}": ${value} (from row ${i})`);
+              return value;
+            }
+          }
         }
       }
     }
@@ -153,17 +143,22 @@ function buildOverviewMetrics(processedData: ProcessedData) {
       ).length;
       
       if (matchCount > 0) {
-        const lastPoint = chart.data[chart.data.length - 1];
-        const seriesKey = chart.series[0]?.key;
-        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
-          const value = lastPoint[seriesKey] as number;
-          console.log(`✓ Word match for ${searchTerms} in "${chart.title}": ${value} (series key: ${seriesKey})`);
-          return value;
+        // Find first non-zero value from the end
+        for (let i = chart.data.length - 1; i >= 0; i--) {
+          const point = chart.data[i];
+          const seriesKey = chart.series[0]?.key;
+          if (seriesKey && point && typeof point[seriesKey] === 'number') {
+            const value = point[seriesKey] as number;
+            if (value !== 0) {
+              console.log(`✓ Word match for ${searchTerms} in "${chart.title}": ${value} (from row ${i})`);
+              return value;
+            }
+          }
         }
       }
     }
     
-    console.log(`✗ No match for ${searchTerms}`);
+    console.log(`✗ No non-zero match for ${searchTerms}`);
     return 0;
   };
 
