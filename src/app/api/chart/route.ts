@@ -106,10 +106,44 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find matching metric
-    const matchingMetric = preAggMetrics.find(
-      (m) => m.toLowerCase() === chartName.toLowerCase()
-    );
+    // Find matching metric with fuzzy matching
+    const findBestMetricMatch = (requested: string, available: string[]): string | null => {
+      const req = requested.toLowerCase().trim();
+      
+      // Exact match first
+      const exact = available.find((m: string) => m.toLowerCase() === req);
+      if (exact) return exact;
+      
+      // Partial match - check if column contains all key words from request
+      const requestWords = req.split(/\s+/).filter((w: string) => w.length > 2);
+      let bestMatch: { metric: string; score: number } | null = null;
+      
+      for (const metric of available) {
+        const metricLower = metric.toLowerCase();
+        const metricWords = metricLower.split(/[\s_-]+/).filter((w: string) => w.length > 0);
+        
+        // Count how many request words are in this metric
+        let matchCount = 0;
+        for (const word of requestWords) {
+          if (metricWords.some((mw: string) => mw.includes(word) || word.includes(mw))) {
+            matchCount++;
+          }
+        }
+        
+        // If any words match, calculate a score
+        if (matchCount > 0) {
+          const score = matchCount / Math.max(requestWords.length, metricWords.length);
+          if (!bestMatch || score > bestMatch.score) {
+            bestMatch = { metric, score };
+          }
+        }
+      }
+      
+      // Return best match if score is decent (at least 50% match)
+      return bestMatch && bestMatch.score >= 0.5 ? bestMatch.metric : null;
+    };
+
+    const matchingMetric = findBestMetricMatch(chartName, preAggMetrics);
 
     if (!matchingMetric) {
       console.error("Metric not found:", {
@@ -128,22 +162,53 @@ export async function GET(request: NextRequest) {
     // Process data to extract time-series
     const processedData = processData(data, mapping);
 
-    // Find the matching chart in time series
-    const chart = processedData.timeSeriesCharts.find(
-      (c) => c.title.toLowerCase() === chartName.toLowerCase()
-    );
+    // Find the matching chart in time series using fuzzy matching
+    const findBestChartMatch = (requested: string, available: any[]): any | null => {
+      const req = requested.toLowerCase().trim();
+      
+      // Exact match first
+      const exact = available.find((c: any) => c.title.toLowerCase() === req);
+      if (exact) return exact;
+      
+      // Partial match
+      const requestWords = req.split(/\s+/).filter((w: string) => w.length > 2);
+      let bestMatch: { chart: any; score: number } | null = null;
+      
+      for (const chart of available) {
+        const chartLower = chart.title.toLowerCase();
+        const chartWords = chartLower.split(/[\s_-]+/).filter((w: string) => w.length > 0);
+        
+        let matchCount = 0;
+        for (const word of requestWords) {
+          if (chartWords.some((cw: string) => cw.includes(word) || word.includes(cw))) {
+            matchCount++;
+          }
+        }
+        
+        if (matchCount > 0) {
+          const score = matchCount / Math.max(requestWords.length, chartWords.length);
+          if (!bestMatch || score > bestMatch.score) {
+            bestMatch = { chart, score };
+          }
+        }
+      }
+      
+      return bestMatch && bestMatch.score >= 0.5 ? bestMatch.chart : null;
+    };
+
+    const chart = findBestChartMatch(chartName, processedData.timeSeriesCharts);
 
     if (!chart) {
       return NextResponse.json(
-        { error: `Could not generate chart data for "${chartName}"` },
+        { error: `Could not generate chart data for "${chartName}". Available: ${processedData.timeSeriesCharts.map(c => c.title).join(", ")}` },
         { status: 500 }
       );
     }
 
     // Extract values for metadata
     const values = chart.data
-      .map((point) => point[matchingMetric] as number)
-      .filter((v) => typeof v === "number" && isFinite(v));
+      .map((point: ChartDataPoint) => point[matchingMetric] as number)
+      .filter((v: number) => typeof v === "number" && isFinite(v));
 
     const response: ChartResponse = {
       data: chart.data,
