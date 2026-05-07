@@ -33,6 +33,11 @@ export async function GET(request: NextRequest) {
       rowCount: data.length,
       rawColumns: columns,
       firstRow: data[0],
+      lastRow: data[data.length - 1],
+      sampleValues: data.slice(0, 3).map(row => ({
+        date: row[columns[0]],
+        firstNumeric: columns.find(col => !col.includes('date') && !col.includes('Date')) ? row[columns.find(col => !col.includes('date') && !col.includes('Date'))!] : null
+      }))
     });
     
     // Detect column types

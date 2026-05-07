@@ -71,7 +71,13 @@ export function tryParseDate(value: string): Date | null {
   return null;
 }
 
-function parseNumber(value: string): number {
+function parseNumber(value: string | number): number {
+  // Handle numbers directly
+  if (typeof value === 'number') {
+    return isNaN(value) ? 0 : value;
+  }
+  
+  // Handle strings
   if (!value || typeof value !== "string") return 0;
   const cleaned = value.replace(/[$€£¥₹,\s%]/g, "").trim();
   if (!cleaned) return 0;
@@ -349,6 +355,19 @@ export function processData(
 
   if (isPreAggregated && primaryDate && preAggMetrics.length > 0) {
     // Handle pre-aggregated metrics directly as time-series data
+    console.log("Processing pre-aggregated metrics:", {
+      metricsCount: preAggMetrics.length,
+      metrics: preAggMetrics.slice(0, 5),
+      primaryDate,
+      firstRowData: filtered[0],
+      lastRowData: filtered[filtered.length - 1],
+      sampleParsing: {
+        mrr_raw: filtered[filtered.length - 1]?.["MRR"],
+        mrr_type: typeof filtered[filtered.length - 1]?.["MRR"],
+        mrr_parsed: parseNumber(filtered[filtered.length - 1]?.["MRR"])
+      }
+    });
+    
     for (const metricCol of preAggMetrics.slice(0, 10)) {
       const chartData: ChartDataPoint[] = filtered
         .filter(row => tryParseDate(row[primaryDate]))
