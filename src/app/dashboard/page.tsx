@@ -93,6 +93,14 @@ function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) 
 }
 
 function buildOverviewMetrics(processedData: ProcessedData) {
+  // Debug: log all available charts
+  console.log("Available charts:", processedData.timeSeriesCharts.map(c => ({
+    title: c.title,
+    dataLength: c.data.length,
+    series: c.series.map(s => ({ key: s.key, label: s.label })),
+    lastValue: c.data[c.data.length - 1] ? c.data[c.data.length - 1][c.series[0]?.key || ""] : "N/A"
+  })));
+
   // Fuzzy match a metric name to find the best chart
   const findBestMetricMatch = (searchTerms: string[]): number => {
     const searchLower = searchTerms.map(s => s.toLowerCase());
@@ -103,8 +111,10 @@ function buildOverviewMetrics(processedData: ProcessedData) {
       if (searchLower.some(term => chartTitleLower === term)) {
         const lastPoint = chart.data[chart.data.length - 1];
         const seriesKey = chart.series[0]?.key;
-        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
-          return lastPoint[seriesKey] as number;
+        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
+          const value = lastPoint[seriesKey] as number;
+          console.log(`✓ Exact match for ${searchTerms}: ${value}`);
+          return value;
         }
       }
     }
@@ -115,8 +125,10 @@ function buildOverviewMetrics(processedData: ProcessedData) {
       if (searchLower.some(term => chartTitleLower.includes(term))) {
         const lastPoint = chart.data[chart.data.length - 1];
         const seriesKey = chart.series[0]?.key;
-        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
-          return lastPoint[seriesKey] as number;
+        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
+          const value = lastPoint[seriesKey] as number;
+          console.log(`✓ Partial match for ${searchTerms} in "${chart.title}": ${value}`);
+          return value;
         }
       }
     }
@@ -131,12 +143,15 @@ function buildOverviewMetrics(processedData: ProcessedData) {
       if (matchCount > 0) {
         const lastPoint = chart.data[chart.data.length - 1];
         const seriesKey = chart.series[0]?.key;
-        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
-          return lastPoint[seriesKey] as number;
+        if (seriesKey && lastPoint && typeof lastPoint[seriesKey] === 'number') {
+          const value = lastPoint[seriesKey] as number;
+          console.log(`✓ Word match for ${searchTerms} in "${chart.title}": ${value}`);
+          return value;
         }
       }
     }
     
+    console.log(`✗ No match for ${searchTerms}`);
     return 0;
   };
 
