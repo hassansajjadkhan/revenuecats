@@ -93,30 +93,60 @@ function findValueFromMetrics(processedData: ProcessedData, keywords: string[]) 
 }
 
 function buildOverviewMetrics(processedData: ProcessedData) {
-  // Extract values from the last data point of each chart
-  const getLatestMetricValue = (chartTitle: string): number => {
-    const chart = processedData.timeSeriesCharts.find(
-      c => c.title.toLowerCase() === chartTitle.toLowerCase()
-    );
+  // Fuzzy match a metric name to find the best chart
+  const findBestMetricMatch = (searchTerms: string[]): number => {
+    const searchLower = searchTerms.map(s => s.toLowerCase());
     
-    if (!chart || chart.data.length === 0) return 0;
-    
-    const lastPoint = chart.data[chart.data.length - 1];
-    const seriesKey = chart.series[0]?.key;
-    
-    if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
-      return lastPoint[seriesKey] as number;
+    // First, try exact match on any term
+    for (const chart of processedData.timeSeriesCharts) {
+      const chartTitleLower = chart.title.toLowerCase();
+      if (searchLower.some(term => chartTitleLower === term)) {
+        const lastPoint = chart.data[chart.data.length - 1];
+        const seriesKey = chart.series[0]?.key;
+        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
+          return lastPoint[seriesKey] as number;
+        }
+      }
     }
+    
+    // Second, try partial match (includes any search term)
+    for (const chart of processedData.timeSeriesCharts) {
+      const chartTitleLower = chart.title.toLowerCase();
+      if (searchLower.some(term => chartTitleLower.includes(term))) {
+        const lastPoint = chart.data[chart.data.length - 1];
+        const seriesKey = chart.series[0]?.key;
+        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
+          return lastPoint[seriesKey] as number;
+        }
+      }
+    }
+    
+    // Third, try word-based fuzzy match
+    for (const chart of processedData.timeSeriesCharts) {
+      const chartWords = chart.title.toLowerCase().split(/[\s\-_]+/);
+      const matchCount = searchLower.filter(term => 
+        chartWords.some(word => word.includes(term) || term.includes(word))
+      ).length;
+      
+      if (matchCount > 0) {
+        const lastPoint = chart.data[chart.data.length - 1];
+        const seriesKey = chart.series[0]?.key;
+        if (seriesKey && typeof lastPoint[seriesKey] === 'number') {
+          return lastPoint[seriesKey] as number;
+        }
+      }
+    }
+    
     return 0;
   };
 
-  // Map to the exact columns from your sheet
-  const activeTrials = getLatestMetricValue("Trial Conversion") || 0;
-  const activeSubscriptions = getLatestMetricValue("Active Subscriptions") || 0;
-  const mrr = getLatestMetricValue("MRR") || 0;
-  const revenue = getLatestMetricValue("Revenue") || 0;
-  const newCustomers = getLatestMetricValue("New Customers") || 0;
-  const arr = getLatestMetricValue("ARR") || 0;
+  // Map metrics with multiple search terms for flexibility
+  const activeTrials = findBestMetricMatch(["trial", "active trial"]);
+  const activeSubscriptions = findBestMetricMatch(["active subscription", "subscription", "active"]);
+  const mrr = findBestMetricMatch(["mrr", "monthly recurring"]);
+  const revenue = findBestMetricMatch(["revenue", "cumulative"]);
+  const newCustomers = findBestMetricMatch(["new customer", "new", "customer"]);
+  const arr = findBestMetricMatch(["arr", "annual recurring"]);
 
   const cards: DashboardMetric[] = [
     { label: "Active Trials", value: formatNumber(activeTrials), change: 2.8, changeLabel: "In total" },
